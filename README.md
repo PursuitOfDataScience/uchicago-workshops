@@ -12,3 +12,7 @@ This repository contains materials designed to support AI-related educational ev
 - **Additional Resources**: Links to further readings and tools.
 
 To get started, please refer to each of the individual directory in this repo.
+
+## License
+
+This repository is licensed under the MIT License. 
