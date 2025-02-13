@@ -21,3 +21,5 @@ The notebook is designed to be executed on Midway3.
 
 3. **Miscellaneous:**  
 If you do not have access to Midway3, the notebook can be executed locally or on [Google Colab](https://colab.research.google.com/). Please note that both the data and the model must be downloaded from Hugging Face. For further details, kindly consult the notebook.
+
+Zoom link: https://uchicago.zoom.us/j/94809203196?pwd=bUAWrdLv9QfyWvTXFQ4otFiwGn8QGS.1
