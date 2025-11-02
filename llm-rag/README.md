@@ -1,6 +1,6 @@
 # Retrieval-Augmented Generation (RAG) in Large Language Model
 
-This repository comprises two notebooks relevant to LLM RAG.
+This repository comprises a notebook relevant to LLM RAG.
 
 ## Getting Started
 
