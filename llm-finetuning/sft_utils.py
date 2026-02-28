@@ -41,25 +41,29 @@ Classes:
     - SFTTrainer: Custom trainer with proper loss computation
 """
 
-import os
-import math
 import gc
+import math
+import os
+import statistics
 import textwrap
 import warnings
-import statistics
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Dict, List, Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 from datasets import load_from_disk
+from peft import LoraConfig, get_peft_model
 from transformers import (
-    AutoConfig, AutoModelForCausalLM, AutoTokenizer,
-    TrainingArguments, Trainer, PreTrainedTokenizerBase
+    AutoConfig,
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    PreTrainedTokenizerBase,
+    Trainer,
+    TrainingArguments,
 )
 from transformers.trainer_callback import TrainerCallback
-from peft import LoraConfig, get_peft_model
 
 
 # =============================================================================
@@ -241,7 +245,8 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
     full_messages = context + [messages[assistant_idx]]
     full_text = apply_chat_template(tokenizer, full_messages, add_generation_prompt=False)
     
-    # Tokenize - use add_special_tokens=False because chat template already includes BOS/EOS
+    # Tokenize - add_special_tokens=False because the chat template already inserts
+    # BOS (<|begin_of_text|>) and EOS tokens; adding them again would shift positions.
     encoded = tokenizer(
         full_text, truncation=True, max_length=max_length, 
         padding="max_length", return_tensors="pt", add_special_tokens=False
@@ -255,7 +260,9 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
         TRUNCATION_STATS["truncated"] += 1
     TRUNCATION_STATS["total"] += 1
     
-    # Create label mask (find where assistant content starts)
+    # Create label mask: compare the full conversation vs. a stub (everything except
+    # the assistant's content).  Tokens that appear only in the full version are the
+    # assistant's actual response — those are the only tokens we train on.
     seq_len = int(attention_mask.sum().item())
     plain_ids = input_ids[:seq_len].tolist()
     
@@ -263,7 +270,8 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
     stub_text = apply_chat_template(tokenizer, stub_messages, add_generation_prompt=False)
     stub_ids = tokenizer(stub_text, truncation=True, max_length=max_length, padding=False, add_special_tokens=False)["input_ids"]
     
-    # Find prefix match
+    # Find prefix match: walk forward to locate where the stub and full text diverge;
+    # that divergence marks the start of the assistant's actual content tokens.
     prefix_len = 0
     for i in range(min(len(plain_ids), len(stub_ids))):
         if plain_ids[i] == stub_ids[i]:
@@ -271,6 +279,8 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
         else:
             break
     
+    # Suffix match: walk backward to skip any trailing template tokens (e.g. EOS,
+    # closing tags) that also appear in the stub, so they aren't counted as content.
     suffix_len = 0
     for i in range(min(len(plain_ids) - prefix_len, len(stub_ids) - prefix_len)):
         if plain_ids[-(i+1)] == stub_ids[-(i+1)]:
@@ -281,12 +291,13 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
     content_start = prefix_len
     content_end = max(prefix_len, len(plain_ids) - suffix_len)
     
-    # Build mask: 1 for assistant tokens, 0 otherwise
+    # Build mask: 1 for assistant-response tokens, 0 for everything else (user
+    # prompt, system message, template markup).  Only "1" positions contribute to loss.
     mask = [0] * len(plain_ids)
     for i in range(content_start, content_end):
         mask[i] = 1
     
-    # Include EOS if present
+    # Include the EOS token in the loss so the model learns when to stop generating.
     terminators = {tokenizer.eos_token_id} if tokenizer.eos_token_id else set()
     if content_end < len(plain_ids) and plain_ids[content_end] in terminators:
         mask[content_end] = 1
@@ -294,7 +305,9 @@ def build_sft_example(tokenizer, messages: List[Dict], assistant_idx: int, max_l
     mask = mask + [0] * (max_length - len(mask))
     mask_tensor = torch.tensor(mask[:max_length], dtype=torch.long)
     
-    # Labels: -100 for ignored tokens
+    # Labels: set to -100 for all non-assistant and padding positions.
+    # PyTorch's cross_entropy ignores targets == -100, so only the assistant
+    # tokens contribute to the training loss (standard SFT label masking).
     labels = input_ids.clone()
     labels[(mask_tensor == 0) | (attention_mask == 0)] = -100
     
@@ -385,7 +398,8 @@ class SFTDataset(torch.utils.data.Dataset):
         mask = torch.tensor(ex["attention_mask"], dtype=torch.long)
         labels = torch.tensor(ex["labels"], dtype=torch.long)
         
-        # Ensure exact length
+        # Ensure exact length — pad or truncate so every batch element has the
+        # same sequence dimension, which is required for stacking into a tensor.
         if ids.shape[0] != self.max_length:
             pad_id = self.tokenizer.pad_token_id
             if ids.shape[0] > self.max_length:
@@ -396,6 +410,7 @@ class SFTDataset(torch.utils.data.Dataset):
                 pad_len = self.max_length - ids.shape[0]
                 ids = torch.cat([ids, torch.full((pad_len,), pad_id, dtype=torch.long)])
                 mask = torch.cat([mask, torch.zeros(pad_len, dtype=torch.long)])
+                # Padding labels are -100 so cross_entropy ignores them.
                 labels = torch.cat([labels, torch.full((pad_len,), -100, dtype=torch.long)])
         
         return {"input_ids": ids, "attention_mask": mask, "labels": labels}
@@ -426,7 +441,8 @@ class UltraChatDataset(torch.utils.data.Dataset):
         
         bos_id, eos_id = self.tokenizer.bos_token_id, self.tokenizer.eos_token_id
         
-        # Tokenize full conversation (context + assistant response)
+        # Tokenize the full conversation (user prompt + assistant response).
+        # Reserve 2 tokens for manually prepending BOS and appending EOS below.
         full_text = apply_chat_template(self.tokenizer, messages, add_generation_prompt=False)
         enc = self.tokenizer(
             full_text, truncation=True, max_length=self.max_len - 2, 
@@ -434,6 +450,8 @@ class UltraChatDataset(torch.utils.data.Dataset):
         )
         input_ids, attn_mask = enc["input_ids"], enc["attention_mask"]
         
+        # Manually add BOS/EOS so we control their exact position.
+        # BOS tells the model "sequence starts here"; EOS teaches it when to stop.
         if bos_id is not None:
             input_ids = [bos_id] + input_ids
             attn_mask = [1] + attn_mask
@@ -441,7 +459,9 @@ class UltraChatDataset(torch.utils.data.Dataset):
             input_ids = input_ids + [eos_id]
             attn_mask = attn_mask + [1]
         
-        # Find prompt length for masking (context only, without assistant response)
+        # Find prompt length for masking: tokenize the context-only portion
+        # (everything before the assistant reply) so we know which leading tokens
+        # to set to -100.  Only the assistant's response tokens will have loss.
         context = messages[:asst_idx]
         prompt_text = apply_chat_template(self.tokenizer, context, add_generation_prompt=True)
         prompt_enc = self.tokenizer(
@@ -450,7 +470,8 @@ class UltraChatDataset(torch.utils.data.Dataset):
         )
         prompt_ids = [bos_id] + prompt_enc["input_ids"] if bos_id else prompt_enc["input_ids"]
         
-        # Find where the prompt ends (longest matching prefix)
+        # Find where the prompt ends (longest matching prefix between prompt-only
+        # and full-conversation token sequences).
         prompt_len = 0
         for i in range(min(len(prompt_ids), len(input_ids))):
             if input_ids[i] == prompt_ids[i]:
@@ -465,7 +486,8 @@ class UltraChatDataset(torch.utils.data.Dataset):
         # Ensure we have at least one token to predict
         prompt_len = min(prompt_len, len(input_ids) - 1)
         
-        # Labels: -100 for prompt tokens (ignored in loss), actual ids for response
+        # Labels: -100 for prompt tokens (ignored by cross_entropy), real token ids
+        # for the assistant response so the model learns to predict those tokens.
         labels = [-100] * prompt_len + input_ids[prompt_len:]
         return {"input_ids": input_ids, "attention_mask": attn_mask, "labels": labels}
 
@@ -491,7 +513,9 @@ class SFTCollator:
             }
         
         max_len = min(max(len(f["input_ids"]) for f in features), self.max_length or 99999)
-        max_len = ((max_len + 7) // 8) * 8  # Round to multiple of 8 for efficiency
+        # Round up to a multiple of 8: GPU tensor-core operations run fastest when
+        # matrix dimensions are multiples of 8 (aligns with hardware warp sizes).
+        max_len = ((max_len + 7) // 8) * 8
         
         batch_size = len(features)
         input_ids = torch.full((batch_size, max_len), self.tokenizer.pad_token_id, dtype=torch.long)
@@ -500,7 +524,9 @@ class SFTCollator:
         
         for i, f in enumerate(features):
             n = min(len(f["input_ids"]), max_len)
-            # Left padding: place content at the right
+            # Left-padding: actual content sits at the right end of the tensor.
+            # This is essential for causal LMs — during generation the model
+            # extends to the right, so padding must be on the left.
             input_ids[i, -n:] = torch.tensor(f["input_ids"][-n:])
             attention_mask[i, -n:] = torch.tensor(f["attention_mask"][-n:])
             labels[i, -n:] = torch.tensor(f["labels"][-n:])
@@ -523,6 +549,31 @@ _QA_COLORS = [
 ]
 _RESET = "\033[0m"
 
+# Shared evaluation prompts used by both GenerationCallback and UltraChatCallback
+_EVAL_PROMPTS = [
+    # Keep one simple baseline
+    "Explain what machine learning is in simple terms.",
+    # Reasoning / slightly challenging
+    "Why might correlation not imply causation? Give an example.",
+    "What are the trade-offs between model complexity and generalization?",
+    # Instruction-following
+    "Summarize the purpose of regularization in exactly two sentences.",
+    # Creative but grounded
+    "Write a short poem about the ocean.",
+]
+
+
+def _wrap_text(text: str, width: int = 80) -> str:
+    """Wrap text to the specified width for better display."""
+    lines = text.split("\n")
+    wrapped = []
+    for line in lines:
+        if len(line) > width:
+            wrapped.extend(textwrap.wrap(line, width=width))
+        else:
+            wrapped.append(line)
+    return "\n".join(wrapped)
+
 
 class GenerationCallback(TrainerCallback):
     """
@@ -532,21 +583,7 @@ class GenerationCallback(TrainerCallback):
     intervals during training, allowing you to qualitatively assess model improvement.
     """
 
-
-    QUESTIONS = [
-        # Keep one simple baseline
-        "Explain what machine learning is in simple terms.",
-        
-        # Reasoning / slightly challenging
-        "Why might correlation not imply causation? Give an example.",
-        "What are the trade-offs between model complexity and generalization?",
-        
-        # Instruction-following
-        "Summarize the purpose of regularization in exactly two sentences.",
-        
-        # Creative but grounded
-        "Write a short poem about the ocean.",
-    ]
+    QUESTIONS = _EVAL_PROMPTS
     
     def __init__(self, tokenizer, steps: int = 100, skip_initial: bool = False):
         self.tokenizer = tokenizer
@@ -564,24 +601,16 @@ class GenerationCallback(TrainerCallback):
         model.eval()
         with torch.no_grad():
             out = model.generate(
-                **inputs, max_new_tokens=150, temperature=0.7, top_p=0.9, 
-                do_sample=True, pad_token_id=self.tokenizer.eos_token_id
+                **inputs,
+                max_new_tokens=150,   # Cap response length to keep generation fast
+                temperature=0.7,      # <1 sharpens the distribution (less random)
+                top_p=0.9,            # Nucleus sampling: keep tokens summing to 90% prob
+                do_sample=True,       # Enable stochastic sampling (vs. greedy argmax)
+                pad_token_id=self.tokenizer.eos_token_id
             )
         response = self.tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         model.train()
         return response
-    
-    def _wrap_text(self, text: str, width: int = 80) -> str:
-        """Wrap text to specified width for better display."""
-        import textwrap
-        lines = text.split('\n')
-        wrapped_lines = []
-        for line in lines:
-            if len(line) > width:
-                wrapped_lines.extend(textwrap.wrap(line, width=width))
-            else:
-                wrapped_lines.append(line)
-        return '\n'.join(wrapped_lines)
     
     def on_train_begin(self, args, state, control, model=None, **kwargs):
         if not self._initial_done and model:
@@ -590,8 +619,8 @@ class GenerationCallback(TrainerCallback):
             print("=" * 50)
             for i, q in enumerate(self.QUESTIONS, 1):
                 q_color, a_color = _QA_COLORS[(i - 1) % len(_QA_COLORS)]
-                response = self._wrap_text(self._generate(model, q))
-                print(f"\n{q_color}[Q{i}] {self._wrap_text(q)}{_RESET}")
+                response = _wrap_text(self._generate(model, q))
+                print(f"\n{q_color}[Q{i}] {_wrap_text(q)}{_RESET}")
                 print(f"{a_color}[A{i}] {response}{_RESET}")
             self._initial_done = True
         return control
@@ -601,8 +630,8 @@ class GenerationCallback(TrainerCallback):
             print(f"\n--- Step {state.global_step} ---")
             for i, q in enumerate(self.QUESTIONS, 1):
                 q_color, a_color = _QA_COLORS[(i - 1) % len(_QA_COLORS)]
-                response = self._wrap_text(self._generate(model, q))
-                print(f"\n{q_color}[Q{i}] {self._wrap_text(q)}{_RESET}")
+                response = _wrap_text(self._generate(model, q))
+                print(f"\n{q_color}[Q{i}] {_wrap_text(q)}{_RESET}")
                 print(f"{a_color}[A{i}] {response}{_RESET}")
         return control
 
@@ -615,38 +644,13 @@ class UltraChatCallback(TrainerCallback):
     generation intervals suitable for the longer UltraChat training runs.
     """
     
-    PROMPTS = [
-        # Keep one simple baseline
-        "Explain what machine learning is in simple terms.",
-        
-        # Reasoning / slightly challenging
-        "Why might correlation not imply causation? Give an example.",
-        "What are the trade-offs between model complexity and generalization?",
-        
-        # Instruction-following
-        "Summarize the purpose of regularization in exactly two sentences.",
-        
-        # Creative but grounded
-        "Write a short poem about the ocean.",
-    ]
+    PROMPTS = _EVAL_PROMPTS
     
     def __init__(self, tokenizer, generation_steps: int = 50):
         self.tokenizer = tokenizer
         self.generation_steps = generation_steps
         self._initial_done = False
         self._last_step = -1
-    
-    def _wrap_text(self, text: str, width: int = 80) -> str:
-        """Wrap text to specified width for better display."""
-        import textwrap
-        lines = text.split('\n')
-        wrapped_lines = []
-        for line in lines:
-            if len(line) > width:
-                wrapped_lines.extend(textwrap.wrap(line, width=width))
-            else:
-                wrapped_lines.append(line)
-        return '\n'.join(wrapped_lines)
     
     def _generate_samples(self, model, label: str):
         """Generate responses to test prompts."""
@@ -671,15 +675,15 @@ class UltraChatCallback(TrainerCallback):
                 out = model.generate(
                     input_ids=ids,
                     attention_mask=torch.ones_like(ids),
-                    max_new_tokens=200,
-                    temperature=0.7,
-                    top_p=0.9,
-                    do_sample=True,
+                    max_new_tokens=200,    # Slightly longer cap for multi-turn eval
+                    temperature=0.7,       # <1 sharpens the distribution (less random)
+                    top_p=0.9,             # Nucleus sampling: keep top 90% cumulative prob
+                    do_sample=True,        # Stochastic sampling instead of greedy decoding
                     pad_token_id=self.tokenizer.eos_token_id,
                 )
             response = self.tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
-            wrapped_prompt = self._wrap_text(prompt)
-            wrapped_response = self._wrap_text(response)
+            wrapped_prompt = _wrap_text(prompt)
+            wrapped_response = _wrap_text(response)
             q_color, a_color = _QA_COLORS[(i - 1) % len(_QA_COLORS)]
             print(f"\n{q_color}[Q{i}] {wrapped_prompt}{_RESET}")
             print(f"{a_color}[A{i}] {wrapped_response}{_RESET}")
@@ -737,8 +741,11 @@ class SFTTrainer(Trainer):
         )
         loss = outputs.loss
         if loss is None:
+            # Manual loss: shift logits and labels by one position so that each
+            # logit at position t predicts the token at position t+1 (causal LM).
             logits = outputs.logits[..., :-1, :].contiguous()
             shifted_labels = labels[..., 1:].contiguous()
+            # ignore_index=-100 makes cross_entropy skip masked (non-assistant) tokens.
             loss = torch.nn.functional.cross_entropy(
                 logits.view(-1, logits.size(-1)), 
                 shifted_labels.view(-1), 
@@ -759,7 +766,13 @@ def _unwrap_model(model):
 
 def ensure_input_grads(model):
     """
-    Enable gradient computation for inputs (needed for gradient checkpointing).
+    Enable gradient computation for the model's input embeddings.
+    
+    Gradient checkpointing recomputes activations during the backward pass to
+    save memory.  It requires that the *first* tensor entering each checkpointed
+    segment has requires_grad=True — otherwise PyTorch cannot build the backward
+    graph through the re-computation boundary.  This helper makes the input
+    embeddings satisfy that requirement.
     
     Args:
         model: The model to enable input gradients for
@@ -834,18 +847,42 @@ def train_with_auto_batch(
                 max_steps=max_steps,
                 per_device_train_batch_size=batch_size, 
                 per_device_eval_batch_size=batch_size,
+                # Gradient accumulation simulates a larger batch by accumulating
+                # gradients over multiple mini-batches before doing one optimizer
+                # step.  effective_batch_size = batch_size × grad_accum.
                 gradient_accumulation_steps=grad_accum, 
+                # Gradient checkpointing trades compute for memory: instead of
+                # storing all intermediate activations, it re-computes them during
+                # the backward pass, roughly halving peak memory at ~30% more time.
                 gradient_checkpointing=True,
+                # AdamW with fused CUDA kernels: combines the optimizer step into
+                # a single kernel launch, reducing GPU overhead.
                 optim="adamw_torch_fused" if torch.cuda.is_available() else "adamw_torch",
+                # Peak learning rate.  1e-5 is a conservative choice for full
+                # fine-tuning of a pre-trained LLM to avoid catastrophic forgetting.
                 learning_rate=1e-5, 
+                # Cosine schedule: LR decays following a half-cosine curve from
+                # the peak down to ~0, giving a smooth annealing that often
+                # converges better than constant or linear schedules.
                 lr_scheduler_type="cosine", 
+                # Warmup ratio: spend the first 5% of training linearly ramping
+                # the LR from 0 to the peak.  Prevents large, unstable updates
+                # when the model parameters are still far from a good region.
                 warmup_ratio=0.05,
+                # Maximum gradient norm for clipping.  Prevents exploding
+                # gradients by rescaling the gradient vector if its L2 norm
+                # exceeds this value.
                 max_grad_norm=1.0, 
+                # L2 weight decay (decoupled from the gradient in AdamW).
+                # Penalises large weights to reduce overfitting.
                 weight_decay=0.01, 
                 logging_steps=10,
                 save_strategy="no", 
                 eval_strategy="steps", 
                 eval_steps=50,
+                # BFloat16 mixed precision: uses 16-bit floats for forward/backward
+                # passes (halving memory and boosting throughput on Ampere+ GPUs)
+                # while keeping optimizer states in FP32 for numerical stability.
                 bf16=True, 
                 dataloader_num_workers=4, 
                 dataloader_pin_memory=True,
@@ -854,6 +891,10 @@ def train_with_auto_batch(
             )
             
             if hasattr(model, "config"):
+                # Disable KV cache: the key-value cache speeds up auto-regressive
+                # generation but is incompatible with gradient checkpointing during
+                # training (it stores activations that checkpointing deliberately
+                # discards to save memory).
                 model.config.use_cache = False
             ensure_input_grads(model)
             
@@ -1113,7 +1154,12 @@ def load_model(model_path: str, local_files_only: bool = False):
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
         device_map=device_map or "auto",
+        # SDPA (Scaled Dot-Product Attention): uses PyTorch's fused attention
+        # kernels (FlashAttention-2 or memory-efficient attention) for faster,
+        # more memory-efficient self-attention computation.
         attn_implementation="sdpa",
+        # Load weights in BFloat16 to halve GPU memory vs. FP32 while
+        # preserving the wide dynamic range needed for stable training.
         dtype=torch.bfloat16,
         trust_remote_code=True,
         local_files_only=local_files_only,
@@ -1139,6 +1185,8 @@ def load_model_for_ultrachat(model_path: str):
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    # Left-padding is used so that variable-length sequences in a batch all
+    # end at the same position — required for correct causal-LM generation.
     tokenizer.padding_side = "left"
 
     model = AutoModelForCausalLM.from_pretrained(
@@ -1280,20 +1328,40 @@ def build_ultrachat_training_args(
         max_steps=max_steps,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=6,
+        # Gradient accumulation: accumulate gradients over this many mini-batches
+        # before performing one optimizer step.
+        # effective_batch_size = batch_size × gradient_accumulation_steps.
         gradient_accumulation_steps=grad_accum,
+        # Gradient checkpointing: recompute activations during backward instead of
+        # storing them, roughly halving peak GPU memory at the cost of ~30% more compute.
         gradient_checkpointing=True,
+        # use_reentrant=False uses the newer, safer autograd implementation that
+        # properly handles complex control flow and is compatible with torch.compile.
         gradient_checkpointing_kwargs={"use_reentrant": False},
+        # Fused AdamW: single CUDA kernel for the parameter update, reducing
+        # kernel-launch overhead compared to the unfused version.
         optim="adamw_torch_fused" if torch.cuda.is_available() else "adamw_torch",
+        # Peak learning rate for the cosine schedule; 2e-5 is a standard starting
+        # point for full fine-tuning of pre-trained LLMs.
         learning_rate=learning_rate,
+        # Cosine LR schedule: smoothly anneals the LR from the peak to ~0
+        # following a half-cosine curve, typically converging better than linear.
         lr_scheduler_type="cosine",
+        # Linear warmup for this many steps to stabilise early training.
         warmup_steps=warmup_steps,
+        # Gradient clipping: rescale the gradient vector if its L2 norm exceeds 1.0,
+        # preventing exploding-gradient spikes.
         max_grad_norm=1.0,
+        # Decoupled L2 weight decay (AdamW): penalises large weights to regularise
+        # the model and reduce overfitting.
         weight_decay=0.01,
         logging_steps=logging_steps,
         save_strategy="no",
         eval_strategy="steps",
         eval_steps=eval_steps,
         report_to="none",
+        # BFloat16 mixed precision: 16-bit forward/backward passes (halves memory,
+        # boosts throughput on Ampere+ GPUs) with FP32 optimizer states for stability.
         bf16=True,
         remove_unused_columns=False,
         batch_eval_metrics=True,
@@ -1328,6 +1396,8 @@ def create_and_run_ultrachat_trainer(
         Trained SFTTrainer
     """
     if hasattr(model, "config"):
+        # Disable KV cache during training — it conflicts with gradient
+        # checkpointing and is only useful for inference-time generation.
         model.config.use_cache = False
 
     ensure_input_grads(model)
@@ -1420,11 +1490,22 @@ def configure_lora(model, target_modules: list, r: int = 64, lora_alpha: int = 1
         Model with LoRA adapters applied
     """
     peft_config = LoraConfig(
+        # Rank of the low-rank matrices A and B.  Higher r captures more
+        # expressive updates but uses more memory; 64 is a generous choice.
         r=r,
+        # Scaling factor: the adapter output is multiplied by lora_alpha / r.
+        # A higher alpha amplifies the adapter's contribution to the output.
         lora_alpha=lora_alpha,
+        # Which linear layers to inject adapters into.  Targeting all attention
+        # projections (q, k, v, o) plus MLP projections (gate, up, down) gives
+        # the adapter enough capacity to steer model behaviour.
         target_modules=target_modules,
+        # Dropout applied to the adapter's intermediate activations to regularise
+        # and reduce overfitting, especially with small datasets.
         lora_dropout=lora_dropout,
+        # bias="none": do not train bias terms — keeps adapter lightweight.
         bias="none",
+        # task_type tells PEFT how to wire the adapter into the model architecture.
         task_type="CAUSAL_LM",
     )
 
