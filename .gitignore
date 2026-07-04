@@ -1,0 +1,13 @@
+# Experiment scratch — kept local, never pushed to GitHub.
+# (All experimental work lives on the `exp` branch per experiments.md, but the
+#  experiment scratch itself is intentionally excluded from the remote.)
+/experiments.md
+/experiments/
+
+# Python / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
