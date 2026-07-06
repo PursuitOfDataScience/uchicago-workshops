@@ -2,20 +2,20 @@
 
 A hands-on workshop that introduces **Claude Code** — Anthropic's agentic coding tool — as *research
 infrastructure* on a shared HPC cluster. You will drive it headlessly, govern what it is allowed to do, extend
-it with your own tools, and script it into unattended, cost-accounted pipelines.
+it with your own tools and **skills**, and script it into unattended, cost-accounted pipelines.
 
 **Tool:** [Claude Code](https://code.claude.com/docs) v2.x &nbsp;•&nbsp; **Model used in the notebook:** `haiku`
 (small, fast, ~$0.01/call) &nbsp;•&nbsp; **Cost of a full notebook run:** well under $1.
 
 > **Where this fits.** Other workshops in this series teach you to *build* an LLM system from raw model calls
 > (`llm-toolcalling`, `llm-rag`, `llm-finetuning`). This one sits one layer up: you *operate and orchestrate a
-> production agent* and configure its **harness** — permissions, project memory, hooks, subagents, MCP, and
-> headless automation. The notebook opens with a table mapping each idea to the thing you may have built by hand.
+> production agent* and configure its **harness** — permissions, project memory, hooks, subagents, skills, MCP,
+> and headless automation. The notebook opens with a table mapping each idea to the thing you may have built by hand.
 
 ## Contents
 ```
 claude-code-tutorial/
-├── claude-code-tutorial.ipynb   # the main notebook: Part I drives the CLI (§1–§12), Part II the Agent SDK (§13–§17)
+├── claude-code-tutorial.ipynb   # the main notebook: Part I drives the CLI (§1–§13), Part II the Agent SDK (§14–§18)
 ├── cc_utils.py                  # small, readable helper module the notebook imports (CLI wrapper + run_async)
 ├── run.sh                       # Slurm launcher (CPU + internet) — nbconvert + a check
 ├── README.md                    # this file
@@ -23,7 +23,7 @@ claude-code-tutorial/
     ├── CLAUDE.md                # project-memory template
     ├── mcp_server.py            # dependency-free MCP tool server (+ an exercise)
     ├── analysis/                # a tiny repo with one planted bug + a pytest suite
-    └── .claude/                 # safe settings.json (secrets denied) + slash commands
+    └── .claude/                 # settings.json (secrets denied) + slash commands + skills/
 ```
 
 ## Getting Started
@@ -40,7 +40,7 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 ```
 Check: `claude --version` should print a **2.x** build.
 
-For the **programmatic** half of the workshop (notebook Part II, §13–§17), also install the Python **Agent
+For the **programmatic** half of the workshop (notebook Part II, §14–§18), also install the Python **Agent
 SDK** — the same engine as `claude -p`, as a library:
 ```bash
 pip install claude-agent-sdk       # needs Python >= 3.10; the SDK drives the `claude` CLI under the hood
@@ -97,7 +97,7 @@ keys or stagger the batch exercise.
 ## Running Claude Code programmatically (the "three doors")
 
 The whole point of a headless agent is to script it. There are **three** ways to run Claude Code from your own
-code — pick by how deeply you want to embed it. Notebook Part II (§13–§17) demonstrates all three live; this is
+code — pick by how deeply you want to embed it. Notebook Part II (§14–§18) demonstrates all three live; this is
 the reference.
 
 | Door | Mechanism | Best for |
@@ -106,7 +106,7 @@ the reference.
 | **2 · The Agent SDK** | `pip install claude-agent-sdk` — the *same engine*, as async Python (or TypeScript) | apps & research scripts that want typed messages, in-process tools, and code-defined policy |
 | **3 · Automation surfaces** | streaming stdin, GitHub Actions, the TypeScript SDK | CI/CD, event-driven bots, long-lived streamed sessions |
 
-### Door 1 — the CLI as a subprocess (all of notebook §1–§12)
+### Door 1 — the CLI as a subprocess (all of notebook §1–§13)
 
 The lowest-common-denominator path: run the binary, read its JSON. Works from any language.
 
@@ -202,6 +202,7 @@ The daily-driver experience can't run headless, so it is a guided exercise. Copy
 3. Switch to **acceptEdits**; have it fix the planted failing test; review with `git diff`.
 4. `Esc` to interrupt, `Esc Esc` to **rewind** to a checkpoint; `@file` mentions, `!` bash mode, `#` quick-memory.
 5. `/add-test`, `/slurm-doctor`, `/agents`, `/mcp`, `/cost`, `/context`.
+6. **Write a skill.** `.claude/skills/` ships one finished (`slurm-triage`, read-only) and one to finish (`sbatch-lint`). Ask a question that matches a skill's `description` and watch the model invoke it **without you naming it** — the model-invoked counterpart to a slash command.
 
 Also worth showing: the VS Code / JetBrains extensions (`/ide`), GitHub Actions (`@claude` on PRs), and the
 Claude Agent SDK (`pip install claude-agent-sdk` — the same engine as `claude -p`).

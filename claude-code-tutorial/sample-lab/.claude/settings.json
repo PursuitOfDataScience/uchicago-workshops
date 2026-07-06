@@ -5,7 +5,11 @@
       "Edit(analysis/**)",
       "Bash(python -m pytest*)",
       "Bash(git status)",
-      "Bash(git diff*)"
+      "Bash(git diff*)",
+      "Skill",
+      "Bash(squeue:*)",
+      "Bash(scontrol show:*)",
+      "Bash(sacct:*)"
     ],
     "deny": [
       "Read(~/.ssh/**)",
