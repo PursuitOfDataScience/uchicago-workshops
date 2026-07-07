@@ -1,5 +1,5 @@
 """
-cc_utils.py  —  helper utilities for the "Claude Code on the Cluster" workshop.
+cc_utils.py  —  helper utilities for the "Claude Code on Midway" workshop.
 
 This module keeps the notebook cells focused on *teaching*. It wraps the real `claude`
 command-line tool in a small, safe Python API and adds a few pretty-printers.
@@ -75,7 +75,8 @@ class Ledger:
         return result_json
 
     def line(self) -> str:
-        return f"cumulative: ${self.usd:.4f} over {self.calls} claude calls"
+        s = "" if self.calls == 1 else "s"
+        return f"cumulative: ${self.usd:.4f} over {self.calls} claude call{s}"
 
 
 LEDGER = Ledger()

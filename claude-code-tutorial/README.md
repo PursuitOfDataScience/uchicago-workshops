@@ -1,4 +1,4 @@
-# Claude Code on the Cluster
+# Claude Code on Midway
 
 A hands-on workshop that introduces **Claude Code** — Anthropic's agentic coding tool — as *research
 infrastructure* on a shared HPC cluster. You will drive it headlessly, govern what it is allowed to do, extend
@@ -15,7 +15,7 @@ refer to its own two halves — driving the CLI, then the Agent SDK — not to t
 > **Where this fits.** Other workshops in this series teach you to *build* an LLM system from raw model calls
 > (`llm-toolcalling`, `llm-rag`, `llm-finetuning`). This one sits one layer up: you *operate and orchestrate a
 > production agent* and configure its **harness** — permissions, project memory, hooks, subagents, skills, MCP,
-> and headless automation. The notebook opens with a table mapping each idea to the thing you may have built by hand.
+> and headless automation. The notebook closes (§19) with a table mapping each idea to the thing you may have built by hand.
 
 ## Contents
 ```
@@ -93,7 +93,7 @@ sbatch --export=ALL,CLAUDE_CONFIG_DIR=$HOME/.claude run.sh
 | Call | Approx cost |
 |---|---|
 | one headless `haiku` call | ~$0.008–0.02 |
-| the whole notebook (≈ 20 calls + 1 agentic fix) | **~$0.40** |
+| the whole notebook (≈ 28 calls, incl. 1 agentic fix) | **~$0.70** |
 | a focused interactive hour on a stronger model | ~$2–6 |
 
 For a live workshop, ask attendees to **install + authenticate before arriving** (10 min), and plan the key
@@ -159,9 +159,9 @@ Highlights the notebook covers in depth:
   it via `mcp_servers={"lab": server}`; the tool appears as `mcp__lab__<name>` (same naming as an external MCP
   server, but no subprocess — it can close over live Python objects).
 - **Governance as Python** — `can_use_tool(tool_name, tool_input, context)` returns
-  `PermissionResultAllow()` / `PermissionResultDeny(...)` (the decision-maker for any tool *not* allow-listed);
+  `PermissionResultAllow()` / `PermissionResultDeny(...)` (the decision-maker for any tool *not* allowlisted);
   and `hooks={"PreToolUse": [HookMatcher(matcher="Write", hooks=[fn])]}` mirrors `settings.json` hooks, where a
-  returned `permissionDecision: "deny"` is a hard veto even for an allow-listed tool.
+  returned `permissionDecision: "deny"` is a hard veto even for an allowlisted tool.
 
 ### Door 3 — automation surfaces
 
