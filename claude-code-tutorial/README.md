@@ -7,6 +7,11 @@ it with your own tools and **skills**, and script it into unattended, cost-accou
 **Tool:** [Claude Code](https://code.claude.com/docs) v2.x &nbsp;•&nbsp; **Model used in the notebook:** `haiku`
 (small, fast, ~$0.01/call) &nbsp;•&nbsp; **Cost of a full notebook run:** well under $1.
 
+**The workshop is delivered in two halves.** First a **~50-slide lecture** (`claude-code-tutorial.pptx`) that builds
+the concepts from first principles — the harness vs. the model, the agentic loop, governance, and safety on shared
+HPC. Then the **hands-on notebook** below, where you run every idea for real. (Inside the notebook, "Part I / Part II"
+refer to its own two halves — driving the CLI, then the Agent SDK — not to the lecture-vs-lab split.)
+
 > **Where this fits.** Other workshops in this series teach you to *build* an LLM system from raw model calls
 > (`llm-toolcalling`, `llm-rag`, `llm-finetuning`). This one sits one layer up: you *operate and orchestrate a
 > production agent* and configure its **harness** — permissions, project memory, hooks, subagents, skills, MCP,
@@ -15,6 +20,7 @@ it with your own tools and **skills**, and script it into unattended, cost-accou
 ## Contents
 ```
 claude-code-tutorial/
+├── claude-code-tutorial.pptx    # the lecture deck (~50 slides) — the presentation half of the workshop
 ├── claude-code-tutorial.ipynb   # the main notebook: Part I drives the CLI (§1–§13), Part II the Agent SDK (§14–§18)
 ├── cc_utils.py                  # small, readable helper module the notebook imports (CLI wrapper + run_async)
 ├── run.sh                       # Slurm launcher (CPU + internet) — nbconvert + a check
