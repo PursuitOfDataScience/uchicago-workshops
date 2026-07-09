@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """answers.py — reference answers for the penguins hands-on lab.
 
-For each task card (01-08) you'll find the prompt (as a comment), the Python code that produces
-the answer, and the expected output commented out beneath it. Read it to check Claude's numbers,
-or run the whole file to reproduce them:
+For each Part 2 task card (Tasks 9–16) you'll find the prompt (as a comment), the Python code that
+produces the answer, and the expected output commented out beneath it. Read it to check Claude's
+numbers, or run the whole file to reproduce them:
 
     python answers.py
 
 The data is read live from the URL in CLAUDE.md, so you need internet on the node. Requires
-pandas (and matplotlib for Task 6) — both are in the workshop's `AI` environment.
+pandas (and matplotlib for Task 14) — both are in the workshop's `AI` environment.
 
 This is the answer key. While you are doing a task, let Claude Code do the analysis — do not paste
 from here, and do not ask Claude to read this file.
@@ -27,7 +27,7 @@ MEAS = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
 
 
 # ============================================================================
-# Task 1 · First look
+# Task 9 · First look
 #   "...overview: rows, columns and types, the three species and their counts,
 #    and how many rows have any missing values."
 # ============================================================================
@@ -51,7 +51,7 @@ print("rows with any missing value:", int(df.isna().any(axis=1).sum()))
 
 
 # ============================================================================
-# Task 2 · Summary by species
+# Task 10 · Summary by species
 #   "For each species, count + mean and sd of body_mass_g and flipper_length_mm."
 # ============================================================================
 summary = (df.groupby("species")[["body_mass_g", "flipper_length_mm"]]
@@ -69,7 +69,7 @@ print(summary.to_string())
 
 
 # ============================================================================
-# Task 3 · The heaviest species
+# Task 11 · The heaviest species
 #   "Which species is heaviest, by how much vs the lightest, and is the gap large
 #    relative to the within-species spread? Numbers + a one-sentence verdict."
 # ============================================================================
@@ -87,7 +87,7 @@ print("within-species sd:", sds.to_dict())
 
 
 # ============================================================================
-# Task 4 · Flipper length vs body mass
+# Task 12 · Flipper length vs body mass
 #   "Correlation overall, then within each species. Does it differ, and why?"
 # ============================================================================
 overall = df["flipper_length_mm"].corr(df["body_mass_g"])
@@ -104,7 +104,7 @@ print("within-species corr:", {k: round(v, 3) for k, v in within.items()})
 
 
 # ============================================================================
-# Task 5 · Data quality
+# Task 13 · Data quality
 #   "Find every row with a missing value and flag implausible measurements —
 #    but do not change or drop any rows."
 # ============================================================================
@@ -129,7 +129,7 @@ print(df[MEAS].agg(["min", "max"]).round(1).to_string())   # implausibility chec
 
 
 # ============================================================================
-# Task 6 · Make a figure
+# Task 14 · Make a figure
 #   "Save a boxplot of body_mass_g by species to body_mass_by_species.png; describe it."
 # ============================================================================
 ax = df.boxplot(column="body_mass_g", by="species", grid=False, figsize=(6, 4))
@@ -147,7 +147,7 @@ print("saved body_mass_by_species.png")
 
 
 # ============================================================================
-# Task 7 · Write it up  (no computation — this is a reference paragraph)
+# Task 15 · Write it up  (no computation — this is a reference paragraph)
 # ============================================================================
 # "We analysed body measurements from 344 penguins across three species (Adelie n=152,
 #  Gentoo n=124, Chinstrap n=68). Gentoo penguins were substantially heavier (mean body mass
@@ -161,7 +161,7 @@ print("saved body_mass_by_species.png")
 
 
 # ============================================================================
-# Task 8 (bonus) · Headless equivalent
+# Task 16 (bonus) · Headless equivalent
 #   `claude -p "...mean body_mass_g per species, as compact JSON" --output-format json --model haiku`
 # ============================================================================
 print(json.dumps({k: round(v) for k, v in df.groupby("species")["body_mass_g"].mean().items()}))
