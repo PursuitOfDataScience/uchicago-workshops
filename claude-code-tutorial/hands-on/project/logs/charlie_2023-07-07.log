@@ -1,0 +1,4 @@
+[2023-07-07 09:14:02] sonde boot ok, firmware 3.2.1
+[2023-07-07 09:14:20] pH channel reading 99.9 (out of range 0-14)
+[2023-07-07 09:14:21] WARN pH sensor drift detected, recommend recalibration
+[2023-07-07 09:15:03] sample stored, flagged pH suspect

@@ -1,0 +1,4 @@
+[2023-07-12 10:02:11] sonde boot ok, firmware 3.2.1
+[2023-07-12 10:02:40] battery voltage 3.1V (threshold 3.4V)
+[2023-07-12 10:03:05] ERROR logger powered down mid-sample, temperature not written
+[2023-07-12 10:20:00] battery swapped, resume

@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
-"""Build 'Claude Code on Midway' — accessible redesign (critique-applied).
+"""Build 'Claude Code on Midway' — an accessible, formal lecture for a general
+research audience, followed by a hands-on lab (see ../hands-on/).
 
-Reuses the existing high-quality figures (diagrams + terminal mockups) from MEDIA,
-rebuilds every text/table slide: plain language, day-to-day-first, <=3 bullets,
-captions that COMPLEMENT (never re-narrate) the figure, HPC detail in speaker notes.
-Run:  python build_deck.py <media_dir> <out.pptx>
+Design intent (see BUILD.md):
+  - declarative slide titles (never opening with What / How / When);
+  - <=3 bullets per slide, each reading as a sentence (bold lead, then plain text);
+  - captions complement the figure, they do not re-narrate it;
+  - clean section dividers with a progress bar, no oversized letters;
+  - concise, factual speaker notes with citations — no 'say aloud' scripts;
+  - claims that need a source carry a small attribution; a References section closes.
+
+Run:  python build_deck.py <figures_dir> <out.pptx>
 """
 import sys
 import deck_engine as D
 from deck_engine import set_notes as N, caption_line
+
+NPARTS = 6
+
 
 def build(MEDIA, OUT):
     def img(n):
@@ -16,306 +25,362 @@ def build(MEDIA, OUT):
 
     prs = D.new_deck()
 
-    # ===================== PART A — WHAT IT IS =====================
+    # ============================= OPENING =============================
     s = D.add_title(prs,
         "RCC WORKSHOP · UNIVERSITY OF CHICAGO",
         "Claude Code on Midway",
-        "An AI coding agent for your everyday research work — in the terminal, on the cluster.",
+        "An AI coding agent for everyday research work — in your terminal, on the cluster.",
         "Youzhi Yu · Research Computing Center")
-    N(s, "Welcome. This is a lecture-plus-notebook workshop. Goal: leave able to install "
-         "Claude Code on Midway, use it interactively for daily research work, keep it safe on a "
-         "shared cluster, and script it into a Slurm batch. CPU + internet only — no GPU needed.")
+    N(s, "A lecture followed by a hands-on lab. By the end you can install Claude Code on "
+         "Midway, use it for daily research work, keep it safe on a shared cluster, and scale "
+         "one command into a batch job. CPU + internet only — no GPU required.")
 
-    D.add_content(prs, "What you'll leave knowing", None, [
-        ("What it is,", "and why it helps with research."),
-        ("How to install it and use it", "day-to-day, on Midway."),
-        ("How to make it yours — and keep it safe —", "on a shared cluster."),
-        ("How to turn one command", "into a batch job over thousands of inputs."),
-    ], body_size=16, gap=16)
+    D.add_agenda(prs, "Today's session", [
+        ("Meet Claude Code", "what an AI agent in the terminal actually is, and why it helps research."),
+        ("Getting started on Midway", "install, log in, and run your first session."),
+        ("Make it yours", "teach it your project, save prompts, add your own tools."),
+        ("Staying in control", "the permission system that makes it safe on shared hardware."),
+        ("Scaling up", "turn one command into a batch over thousands of inputs."),
+        ("Trust and honest limits", "prompt injection, your data, and when not to use it."),
+    ], note="We close with a hands-on lab: you drive Claude Code on a real, messy research project.")
 
-    D.add_divider(prs, "A", "What is Claude Code?",
-        "And why you'd put an AI agent in your terminal.")
+    # ===================== PART 1 — MEET CLAUDE CODE =====================
+    D.add_divider(prs, 1, NPARTS, "Meet Claude Code",
+        "An AI agent that does research work in your terminal.")
 
-    s = D.add_image(prs, "From autocomplete to an agent",
-        "The jump that matters is the last one.", img(1))
-    N(s, "Autocomplete finishes your line; a chat assistant answers when you paste code in; an "
-         "agent does the work — reads files, runs commands, edits, checks — while you supervise.")
+    s = D.add_image(prs, "An agent does the work, not just the typing",
+        "The step that matters is the last one.", img(1))
+    N(s, "Autocomplete finishes a line; a chat assistant answers when you paste code in; an "
+         "agent reads files, runs commands, edits, and checks the result — in a loop — while "
+         "you supervise. Claude Code is the third kind.")
 
-    s = D.add_content(prs, "What is Claude Code?",
-        "You don't need to be a programmer — if you use a terminal, you can use this.", [
-        ("An agent, not autocomplete.", "It reads your files, runs commands, and edits code — in a loop, until the job is done."),
-        ("It lives in your terminal.", "The same place you already run Python and your cluster jobs."),
-        ("One tool, many ways to use it.", "Terminal, VS Code, GitHub, or run from Python."),
+    s = D.add_content(prs, "Claude Code, in plain terms",
+        "You do not need to be a programmer. If you use a terminal, you can use it.", [
+        ("An agent, not autocomplete.", "It reads your files, runs commands, and edits them in a loop until the job is done."),
+        ("It lives in your terminal.", "The same place you already run Python and submit cluster jobs."),
+        ("One tool, many front doors.", "Terminal, VS Code, JetBrains, GitHub, or driven from a script."),
     ])
-    N(s, "Reassure the room: this is not just for software engineers. A call costs about a cent on "
-         "Haiku, and everything it does is logged and undoable. v2, generally available, weekly releases.")
+    N(s, "Anthropic's definition: \"an agentic coding tool that reads your codebase, edits "
+         "files, runs commands, and integrates with your development tools.\" It is generally "
+         "available (v2.x) with frequent releases. Every action is logged, permission-checked, "
+         "and priced; a small-model call costs about a cent. Source: Claude Code overview docs.")
 
-    s = D.add_image(prs, "How it works: a loop",
-        "Everything later in this talk is just a setting on this loop.", img(2))
-    N(s, "Gather context, decide the next step, act (one tool call), check the result — repeat until "
-         "done. The 'act' step always clears a permission check first; we unpack permissions in Part D.")
+    s = D.add_image(prs, "It works in a loop: gather, act, check, repeat",
+        "Every setting later in this talk tunes one step of this loop.", img(2),
+        source="Loop framing: Anthropic, \"Building effective agents\" (2024) and the Claude Agent SDK.")
+    N(s, "Anthropic describes an agent as an LLM \"using tools based on environmental feedback "
+         "in a loop\": gather context, take an action (one tool call), verify the result, repeat "
+         "until the goal is met. The 'act' step always clears a permission check first (Part 4).")
 
-    s = D.add_image(prs, "Two parts: the program and the model",
-        "The program (the diagrams call it the *harness*) is yours to shape; the model just answers.",
+    s = D.add_image(prs, "Two parts: a program you control, a model it calls",
+        "The program — the diagrams call it the harness — is yours to shape; the model just answers.",
         img(3))
-    N(s, "Key mental model. 'harness' = the claude program on your machine — what this workshop "
-         "configures. The model is a large language model (Claude) reached over the internet; it's "
-         "swappable. Don't memorize the inner boxes — we take each one later.")
+    N(s, "Key mental model. The harness is the claude program on your machine — the thing this "
+         "workshop configures. The model is a large language model (Claude) reached over the "
+         "network, and it is swappable. Everything else in this talk configures the harness.")
 
-    s = D.add_content(prs, "How it finds its way around your code", None, [
-        ("It looks like you do.", "It searches and opens your real files — nothing to index or set up first."),
-        ("Your layout is its context.", "A tidy project folder helps it find the right things."),
-        ("It checks its work.", "A test, an exit code, or a linter (which flags code mistakes) confirms the change worked."),
+    s = D.add_content(prs, "It finds its way around your project", None, [
+        ("It looks the way you do.", "It searches and opens your real files — nothing to index or set up first."),
+        ("Your layout is its context.", "A tidy project folder helps it find the right things quickly."),
+        ("It checks its own work.", "A test, an exit code, or a linter confirms a change actually worked."),
     ])
-    N(s, "'context' = everything it currently has in view. Contrast with search engines that build an "
-         "index first: here there's nothing to embed and nothing to go stale — it reads the live files.")
+    N(s, "'Context' is everything the agent currently has in view. Unlike a search engine that "
+         "builds an index first, there is nothing to embed and nothing to go stale — it reads the "
+         "live files each session. This is why a clear repo structure pays off.")
 
-    s = D.add_content(prs, "Why researchers find it useful", None, [
-        ("Not just code.", "Data wrangling, log triage, plotting, a LaTeX draft, or your lit-review notes."),
-        ("It scripts.", "One command, machine-readable output — drop it into a pipeline or a Slurm job."),
-        ("Everything's on the record.", "Every action is logged, permission-checked, and priced."),
+    s = D.add_content(prs, "Where it earns its place in research", None, [
+        ("Not only code.", "Data wrangling, log triage, plotting, a first-draft methods paragraph, or lit-review notes."),
+        ("It scripts.", "One command in, a machine-readable answer out — drop it into a pipeline or a Slurm job."),
+        ("Everything is on the record.", "Every action is logged, permission-checked, and costed."),
     ])
-    N(s, "Concrete example to say aloud: point it at a folder of CSVs and ask it to standardize "
-         "column names, or hand it a failing analysis script and ask why. Auditable and isolable — "
-         "but because the model samples, runs are not bit-for-bit reproducible.")
+    N(s, "Concrete uses: point it at a folder of CSVs and standardize the column names; hand it a "
+         "failing analysis script and ask why. It is auditable and can be isolated — but because "
+         "the model samples, runs are not bit-for-bit reproducible. Verify the output.")
 
-    # ===================== PART B — GET STARTED ON MIDWAY =====================
-    D.add_divider(prs, "B", "Getting started on Midway",
-        "Install once, log in once — then you're working.", accent=D.BLUE)
+    # ===================== PART 2 — GETTING STARTED =====================
+    D.add_divider(prs, 2, NPARTS, "Getting started on Midway",
+        "Install once, log in once — then you are working.", accent=D.BLUE)
 
-    s = D.add_image(prs, "Install and log in — once, no admin rights",
-        "Into your home dir; log in once — then grab an internet node (test or caslake).", img(11))
-    N(s, "Run it on Midway3, three steps: (1) grab a node with internet — sinteractive/sbatch on the "
-         "test or caslake partition (login nodes also reach the internet; many other compute nodes "
-         "do NOT); (2) activate the shared env: "
-         "source /software/python-miniforge-25.3.0-el8-x86_64/bin/activate AI ; "
-         "then export CLAUDE_CONFIG_DIR=$HOME/.claude and DISABLE_AUTOUPDATER=1; (3) claude --version "
-         "should print 2.x. Run chmod 700 ~/.claude — your login token lives there and cluster homes "
-         "can be group-readable. 'claude setup-token' does the paste-URL OAuth flow once (works over SSH).")
+    s = D.add_image(prs, "Install and log in — once, and without admin rights",
+        "It installs into your home directory; log in once, then grab a node with internet.",
+        img(11))
+    N(s, "On Midway3: (1) get a node with internet egress — sinteractive/sbatch on the test or "
+         "caslake partition, or a login node; many other compute nodes have no egress. "
+         "(2) install with the one-line script (no sudo, no Node). (3) 'claude setup-token' does "
+         "a one-time paste-URL login that works over SSH; or export ANTHROPIC_API_KEY. Run "
+         "chmod 700 ~/.claude — cluster homes can be group-readable. Source: Claude Code setup docs.")
 
-    s = D.add_two_column(prs, "Two ways to use it", None,
+    s = D.add_two_column(prs, "Two ways to work with it", None,
         {"head": "Interactive — your daily driver", "head_color": D.BLUE, "lines": [
-            "Run `claude` in a folder and just talk to it.",
+            "Run `claude` in a folder and talk to it.",
             "`@file` points at a file, `!` runs a shell command, `/` fires a saved command.",
-            "Where you'll spend most of your time.",
+            "Where you will spend most of your time — and the hands-on lab.",
         ]},
         {"head": "Headless — `claude -p \"…\"`", "head_color": D.TEAL, "lines": [
-            "One command in, answer out.",
+            "One prompt in, one answer out.",
             "For scripts, batch jobs, and pipelines.",
-            "The second half of this deck.",
+            "The 'Scaling up' section, later.",
         ]})
-    N(s, "It pauses and asks before doing anything risky — we show exactly how in 'Who's in control' "
-         "(Part D). Interactive can't run headless, so the notebook's REPL lab is a guided take-home.")
+    N(s, "Interactive is the conversational REPL. Headless (-p / --print) runs a single "
+         "non-interactive turn and exits — the building block of automation. It pauses and asks "
+         "before anything risky; we show exactly how in Part 4.")
 
-    s = D.add_image(prs, "What a session looks like",
-        "It reads, edits, runs the tests, and reports the cost — and you watch every step.", img(18))
-    N(s, "Walk through the trace top to bottom: prompt, then Read/Grep/Edit/Bash tool calls with "
-         "results, then a plain-English summary with cost and turn count. The approve/deny prompts and "
-         "Shift+Tab modes shown here are explained in Part D — flag that now so nobody feels lost.")
+    s = D.add_image(prs, "A session, step by step",
+        "It reads, edits, runs the tests, and reports the cost — and you watch every step.",
+        img(18))
+    N(s, "The trace runs top to bottom: the user prompt, then Read/Grep/Edit/Bash tool calls with "
+         "their results, then a plain-language summary with cost and turn count. The approve/deny "
+         "prompts and Shift+Tab modes shown here are explained in Part 4.")
 
-    s = D.add_table(prs, "Pick a model for the job",
-        "Switch anytime with `/model`. Bigger = smarter but pricier; smaller = fast and cheap for bulk.",
-        ["Model", "Best for", "Cost"],
+    s = D.add_table(prs, "Choosing a model for the job",
+        "Switch anytime with `/model`. Bigger is smarter but pricier; smaller is fast and cheap for bulk.",
+        ["Model", "Best for", "Relative cost"],
         [["Opus", "The hardest reasoning", "$$$"],
-         ["Sonnet", "Everyday, balanced work", "$$"],
-         ["Haiku", "Fast, cheap — great for batch", "$   (about 1¢ a call)"]],
-        colw=[1.4, 4.4, 2.0], row_h=0.6)
-    N(s, "Rough prices per million tokens (in/out): Opus ~$5/$25, Sonnet ~$3/$15, Haiku ~$1/$5. "
-         "Aliases (opus/sonnet/haiku) resolve per provider — pin a full model id in shared configs. "
-         "The notebook and run.sh use Haiku so a full run is well under $1.")
+         ["Sonnet", "Balanced, everyday work", "$$"],
+         ["Haiku", "Fast and cheap — ideal for batch", "$"]],
+        colw=[1.5, 4.6, 1.9], row_h=0.62,
+        source="Current models and per-token pricing: Anthropic pricing page.")
+    N(s, "As of mid-2026 the family is Opus 4.8, Sonnet 5, and Haiku 4.5. Approximate list "
+         "price per million tokens (input/output): Opus ~$5/$25, Sonnet ~$3/$15, Haiku ~$1/$5 — "
+         "confirm on the pricing page, as prices change. Aliases (opus/sonnet/haiku) resolve to "
+         "the current version; pin a full model id in shared configs. The lab runs on Haiku.")
 
-    s = D.add_content(prs, "Handy moves in an interactive session", None, [
-        ("Shift+Tab", "changes how much it can do on its own — from ask-first to hands-off (see “Who's in control”)."),
-        ("Esc  /  Esc Esc", "stops it, or rewinds to before its last edit."),
-        ("`/cost`  ·  `/clear`  ·  `/help`", "check spend, start a fresh context, list commands."),
-    ], body_size=15.5, gap=15)
-    N(s, "Also: '#' jots a quick project memory, '@' mentions a file. Sessions are saved to disk — "
-         "'--resume' continues one and '--fork-session' branches it; Esc Esc rewind is a local undo of "
-         "Claude's edits (not a replacement for git). /context shows what's loaded; /usage shows plan limits.")
+    s = D.add_content(prs, "A few moves worth knowing", None, [
+        ("Shift+Tab", "cycles how much it may do on its own — from ask-first, to read-only plan, to auto-edit."),
+        ("Esc, then Esc Esc", "stops it; or rewinds to before its last edit (a local checkpoint)."),
+        ("/cost  ·  /clear  ·  /help", "check spend, start a fresh context, or list every command."),
+    ], body_size=14.5, gap=14)
+    N(s, "Also useful: '#' jots a quick note into project memory, '@' mentions a file, '/status' "
+         "shows your account and model. Sessions are saved to disk: '--resume' continues one and "
+         "'--fork-session' branches it. Esc-Esc rewind undoes Claude's edits locally — it is not a "
+         "replacement for git.")
 
-    # ===================== PART C — MAKE IT FIT YOUR PROJECT =====================
-    D.add_divider(prs, "C", "Make it yours",
-        "Teach it your project, save your prompts, add your tools.")
+    # ===================== PART 3 — MAKE IT YOURS =====================
+    D.add_divider(prs, 3, NPARTS, "Make it yours",
+        "Teach it your project, save your prompts, add your own tools.")
 
-    s = D.add_image(prs, "Everything around the agent is yours to shape",
-        "A map of what you can shape — the small §-numbers point to the notebook, not this deck.",
+    s = D.add_image(prs, "Everything around the model is yours to shape",
+        "A map of what you configure. The model sits in the middle; the harness surrounds it.",
         img(4))
-    N(s, "This is the roadmap for Parts C and D. One box we won't give its own slide: subagents — a "
-         "scoped helper (say, a reviewer that can only read) that keeps your main session focused. "
-         "The §-numbers are hands-on-notebook sections, not slide numbers.")
+    N(s, "This is the roadmap for Parts 3 and 4. Each spoke is a way to shape the harness. One "
+         "we will not give its own slide: subagents — a scoped helper (say, a reviewer that can "
+         "only read) that keeps your main session focused. You meet all of these in the lab.")
 
-    s = D.add_content(prs, "Project memory: CLAUDE.md", None, [
-        ("A plain Markdown file", "it reads at the start of every session in that folder."),
-        ("Put your project's facts in it", "“tests live here,” “use conda env AI,” your house style."),
-        ("`/init` writes a starter", "keep it short — it's advice, not a hard rule."),
+    s = D.add_content(prs, "Project memory: a file it reads every time",
+        "`CLAUDE.md` — a plain Markdown file, loaded at the start of every session in that folder.", [
+        ("Write down your project's facts.", "“tests live here,” “use the conda env AI,” “raw data is read-only.”"),
+        ("`/init` writes a starter for you.", "Keep it short — under about 200 lines. It is advice, not a hard rule."),
+        ("It is shared, via git.", "Check it in and the whole lab gets the same onboarding."),
     ])
-    N(s, "There's a hierarchy: org policy, then your ~/.claude, then the project file (check it into "
-         "version control so the whole lab shares it). Keep it under ~200 lines. For guarantees you "
-         "can't rely on advice — that's what permissions and hooks are for.")
+    N(s, "There is a hierarchy: enterprise/managed policy, then your personal ~/.claude, then the "
+         "project file, then a local override. For guarantees you cannot rely on advice — that is "
+         "what permissions and hooks (Part 4) are for. Source: Claude Code memory docs.")
 
     s = D.add_image(prs, "Save a prompt you reuse: slash commands",
-        "A prompt you save once and fire by name.", img(13))
-    N(s, "Lives in .claude/commands/<name>.md. Check it into git (version control) and the whole lab "
-         "shares it. Frontmatter can scope which tools it may use; $ARGUMENTS, !commands and @files "
-         "expand inline. This is the prompt YOU fire — contrast with a skill, next.")
+        "A prompt you write once and fire by name — versioned and shared with your lab.", img(13))
+    N(s, "A slash command is a Markdown file in .claude/commands/<name>.md. Frontmatter can scope "
+         "which tools it may use; $ARGUMENTS, inline !commands, and @files expand into the prompt. "
+         "This is the prompt YOU fire — contrast with a skill, next. Source: Claude Code commands docs.")
 
-    s = D.add_image(prs, "Skills: prompts the model runs itself",
-        "You don't call it — the model reaches for it when your request fits.", img(6))
-    N(s, "A skill is a folder (SKILL.md + optional scripts). It loads in layers: the one-line "
-         "description is always in view (cheap); the body loads only when your request matches; extra "
-         "files load only if needed. The model-invoked counterpart to a slash command.")
+    s = D.add_image(prs, "Skills: abilities the model reaches for itself",
+        "You do not call it — the model loads it when your request matches its description.", img(6),
+        source="Agent Skills: Anthropic, \"Equipping agents for the real world with Agent Skills\" (2025).")
+    N(s, "A skill is a folder (SKILL.md plus optional scripts and reference files). Progressive "
+         "disclosure: the one-line description is always in view (cheap); the body loads only when "
+         "your request matches; extra files load only if needed. So a whole library of expertise "
+         "costs almost no context until it is relevant. It is the model-invoked twin of a command.")
 
-    # ===================== PART D — STAYING IN CONTROL =====================
-    D.add_divider(prs, "D", "Who's in control",
+    # ===================== PART 4 — STAYING IN CONTROL =====================
+    D.add_divider(prs, 4, NPARTS, "Staying in control",
         "The part that makes it safe on a shared cluster.", accent=D.BLUE)
 
-    s = D.add_table(prs, "You set how much it can do",
-        "Shift+Tab cycles these. You set the mode — the model can't.",
+    s = D.add_table(prs, "You decide how much it can do",
+        "Shift+Tab cycles these. You set the mode — the model cannot change it.",
         ["Mode", "What it does"],
-        [["Ask first  (default)", "Asks before its first edit or command"],
-         ["Plan", "Read-only — it proposes, never changes anything"],
-         ["Auto-edit", "Approves its own edits inside this folder"]],
-        colw=[2.2, 5.6], row_h=0.56, body_size=13)
+        [["Ask first (default)", "Reads freely; asks before its first edit or command"],
+         ["Plan", "Read-only — it proposes changes but makes none"],
+         ["Accept edits", "Approves its own edits inside the current folder"]],
+        colw=[2.3, 5.7], row_h=0.6, body_size=13)
     caption_line(prs.slides[-1],
-        "A fourth mode, Bypass, skips all checks — only in a throwaway container or VM, never on shared files.",
-        y=4.58)
+        "A fourth mode skips all checks — only ever in a throwaway container or VM, never on shared files.",
+        y=4.55)
     N(prs.slides[-1],
-        "Use Ask-first for everyday work; Plan to explore safely; Auto-edit for tight loops but only "
-        "in a clean git repo (git = version control that lets you undo). Bypass = bypassPermissions: "
-        "never on a shared filesystem — a bad rm or chmod there hits your whole lab.")
+        "Use Ask-first for everyday work, Plan to explore safely, Accept-edits for a tight loop but "
+        "only in a clean git repo. The fourth mode is bypassPermissions (--dangerously-skip-"
+        "permissions): never on a shared filesystem — a bad rm or chmod there hits your whole lab. "
+        "Source: Claude Code permission-modes docs.")
 
-    s = D.add_image(prs, "What “asking first” looks like",
-        "Before anything risky, it stops and asks — it can't approve itself.", img(19))
-    N(s, "You choose: allow once, allow always for this kind of command, or say no and redirect it. "
-         "This is the everyday day-1 experience of interactive mode.")
+    s = D.add_image(prs, "Before anything risky, it stops and asks",
+        "You choose: allow once, always allow this kind, or say no and redirect it.", img(19))
+    N(s, "This is the everyday interactive experience. The agent cannot approve itself — the "
+         "harness asks you. Read-only commands (ls, cat, git status) run without a prompt; edits "
+         "and shell commands need approval unless you have allowed them.")
 
-    s = D.add_image(prs, "Rules in a settings file — and who wins",
-        "Listed in `.claude/settings.json`; a deny always wins. (A hook can also veto — next slide.)",
-        img(7))
-    N(s, "allow / ask / deny lists, e.g. Edit(analysis/**), Read(~/.ssh/**), Bash(rm -rf*). Precedence: "
-         "deny beats everything, then a hook can veto, then an allow/mode lets it run, else it's denied "
-         "(asks, if interactive). You set these; the model cannot loosen them.")
+    s = D.add_image(prs, "Rules live in a settings file — and a deny always wins",
+        "Listed in `.claude/settings.json`. A hook can also veto, as we will see next.",
+        img(7), source="Precedence and rule syntax: Anthropic, Claude Code permissions docs.")
+    N(s, "allow / ask / deny lists, e.g. Edit(analysis/**), Read(~/.ssh/**), Bash(rm -rf*). "
+         "Precedence: deny beats everything, then a hook can veto, then an allow or mode lets it "
+         "run, else it is denied (and asks, if interactive). You set these; the model cannot loosen "
+         "them. Managed/enterprise settings can be locked so users cannot override them.")
 
-    s = D.add_image(prs, "Hooks: a rule it can't forget",
-        "A check the program runs itself, every time — the model can't skip it.", img(14))
-    N(s, "A hook is a shell command the harness runs on a matching event (e.g. before every Write). "
-         "Exit 0 allows the action; exit 2 blocks it and hands the reason back to the model. CLAUDE.md "
-         "is advice the model can forget; a hook is deterministic policy. Admins can ship a locked "
-         "settings.json that users can't loosen — right for a cluster.")
-
-    # ===================== PART E — SCALING UP =====================
-    D.add_divider(prs, "E", "Scaling up",
-        "From one command to a batch of thousands.")
-
-    s = D.add_image(prs, "One command, a structured answer",
-        "One turn in, one machine-readable object out — the building block of every script.", img(5))
-    N(s, "`claude -p \"…\" --output-format json` runs a single non-interactive turn and returns an "
-         "object you can parse from any language: result (the text), total_cost_usd, session_id "
-         "(to resume/audit), num_turns, is_error, permission_denials. This is Door 1.")
-
-    s = D.add_image(prs, "Get back exactly the fields you want",
-        "Ask for specific fields and types; get validated data back, not prose to parse.", img(12))
-    N(s, "`--json-schema` hands the model a schema and returns validated fields, with retries on "
-         "mismatch. Ideal for extraction across many files — e.g. pull organism, sample size, and a "
-         "significance flag out of hundreds of paper abstracts into a clean table.")
-
-    s = D.add_content(prs, "Every call has a price tag", None, [
-        ("The cost is in the output", "dollars, tokens (the units it's billed in), turns (back-and-forth steps), and whether it errored."),
-        ("Cap it up front", "`--max-budget-usd` and `--max-turns` stop a runaway."),
-        ("In a session, `/cost`", "shows your spend at a glance."),
-    ])
-    N(s, "total_cost_usd is a client-side estimate — reconcile grant spend against the Console. The "
-         "notebook keeps a running ledger as it goes. /usage shows plan limits in the REPL.")
-
-    s = D.add_image(prs, "Watch it fix a failing test",
-        "It edits and re-runs the test; you re-check the exit code yourself (0 = passed).", img(8))
-    N(s, "Capstone in the notebook. The permission mode — not the model — is what lets it edit "
-         "autonomously. Ground truth is the exit code WE check, never the model's claim. TDD is the "
-         "strongest pattern: a failing test gives an unattended run a clear place to stop. This one "
-         "call is the unit that the next slide fans out.")
-
-    s = D.add_image(prs, "From one call to a Slurm batch",
-        "One call is the unit of a batch job — loop it, sum the cost, submit it.", img(9))
-    N(s, "The shipped run.sh does exactly this and preflights a cheap Haiku call first, so a node with "
-         "no internet fails in seconds instead of after a long job. Watch rate limits: dozens of "
-         "simultaneous calls from one org key will throttle — stagger them or use per-user keys.")
-
-    s = D.add_image(prs, "Give it your own cluster tools (MCP)",
-        "MCP (Model Context Protocol) lets Claude call tools you write.", img(15))
-    N(s, "Wrap a Slurm submitter, a dataset catalog, or a SQL warehouse as an MCP tool and Claude "
-         "calls it like any built-in (named mcp__<server>__<tool>). Deny-by-default until you allow it. "
-         "The SDK can even define tools in-process, closing over live Python objects.")
-
-    s = D.add_image(prs, "Three ways to script it",
-        "Drive it from your own code: the `claude` command, a Python library, or an automated pipeline.",
-        img(10))
-    N(s, "Door 1: the CLI as a subprocess — any language, shell/Slurm glue. Door 2: the Python Agent "
-         "SDK (pip install claude-agent-sdk) — same engine, typed messages, in-process tools, policy "
-         "as Python. Door 3: automation — GitHub Actions (@claude on a PR), streamed stdin, the "
-         "TypeScript SDK. The notebook's Part II goes deep on the Agent SDK.")
-
-    # ===================== PART F — SAFETY & HONEST LIMITS =====================
-    D.add_divider(prs, "F", "Safety, trust & honest limits",
-        "Non-negotiable on shared research infrastructure.", accent=D.BLUE)
+    s = D.add_image(prs, "Hooks: a check the program cannot skip",
+        "Set it once in `settings.json`; it runs before the tool, on every matching event.",
+        img(14))
+    N(s, "A hook runs on a lifecycle event (e.g. before every Write). Exit 0 allows the action; "
+         "exit 2 blocks it and hands the reason back to the model. CLAUDE.md is advice the model "
+         "can forget; a hook is policy the harness enforces every time. Source: Claude Code hooks docs.")
 
     s = D.add_content(prs, "Safe on a shared cluster", None, [
         ("Use the permission ladder.", "Plan to explore; auto-edit only in a clean git repo; never bypass on shared files."),
-        ("It can read what you can.", "Start it in your project folder, and block sensitive folders (e.g. `~/.ssh`)."),
-        ("Keep secrets out of your jobs.", "Log in with the token, not a raw API key, so nothing secret rides into a batch job."),
+        ("It can read what you can.", "Start it in your project folder, and deny sensitive paths (e.g. `~/.ssh`, `.env`)."),
+        ("Keep secrets out of jobs.", "Log in with the token, not a raw API key, so nothing secret rides into a batch job."),
     ])
-    N(s, "On the key leak: the danger is a plaintext ANTHROPIC_API_KEY in your shell — sbatch "
-         "--export=ALL would copy it into the job env, readable via scontrol. The shipped run.sh uses "
-         "--export=ALL safely BECAUSE it relies on the CLAUDE_CONFIG_DIR OAuth token, not a raw key. "
-         "Also chmod 700 ~/.claude on shared homes.")
+    N(s, "On the key leak: a plaintext ANTHROPIC_API_KEY in your shell would be copied by 'sbatch "
+         "--export=ALL' into the job environment, readable via scontrol. Prefer the CLAUDE_CONFIG_DIR "
+         "login token, or source a chmod-600 key at runtime. Also chmod 700 ~/.claude on shared homes.")
 
-    s = D.add_content(prs, "Trust is the real risk", None, [
-        ("Prompt injection is real.", "A web page, a pull request (a code-review request), or a tool's result can carry hidden instructions."),
-        ("A skill is software.", "Installing one runs its code as you — only accept tools and hooks you trust."),
-    ], body_size=15.5, gap=16)
-    N(s, "Workspace trust: .mcp.json, hooks, and skill grants take effect only after you accept them. "
-         "Anything the agent ingests is a potential instruction channel — treat untrusted input with care.")
+    # ===================== PART 5 — SCALING UP =====================
+    D.add_divider(prs, 5, NPARTS, "Scaling up",
+        "From one command to a batch over thousands of inputs.")
 
-    s = D.add_content(prs, "Your data and your obligations", None, [
-        ("Don't send restricted data.", "IRB, PHI, or export-controlled data needs institutional approval first."),
-        ("Disclose AI help", "per your venue's policy; keep the transcript as a record."),
-        ("Generated code is still yours.", "Review and license it like any other dependency."),
+    s = D.add_image(prs, "One command, a structured answer",
+        "One turn in, one machine-readable object out — the building block of every pipeline.",
+        img(5))
+    N(s, "'claude -p \"…\" --output-format json' runs a single non-interactive turn and returns an "
+         "object you can parse from any language: result (the text), total_cost_usd, session_id "
+         "(to resume or audit), num_turns, is_error, permission_denials. Add --json-schema to force "
+         "the reply into fields validated against a schema. Source: Claude Code headless docs.")
+
+    s = D.add_image(prs, "From one call to a Slurm batch",
+        "One call is the unit of a batch job — loop it, sum the cost, submit it.", img(9))
+    N(s, "A launcher script loops the headless call over many inputs and totals the cost; a Slurm "
+         "job runs it unattended. Preflight one cheap call first, so a node with no internet fails "
+         "in seconds. Watch rate limits: dozens of simultaneous calls from one org key will throttle "
+         "— stagger them or use per-user keys. The lab's Bonus A does exactly this.")
+
+    s = D.add_image(prs, "Give it your own tools with MCP",
+        "An open standard — the same tool server works in any MCP-aware app, not only Claude Code.",
+        img(15), source="MCP: Anthropic, \"Introducing the Model Context Protocol\" (2024); modelcontextprotocol.io.")
+    N(s, "Wrap a Slurm submitter, a dataset catalog, or a SQL warehouse as an MCP tool and Claude "
+         "calls it like any built-in (named mcp__<server>__<tool>). MCP is an open standard — \"a "
+         "USB-C port for AI applications.\" Tools are deny-by-default until you allow them. The lab's "
+         "Bonus B ships a tiny MCP server you extend.")
+
+    # ===================== PART 6 — TRUST & LIMITS =====================
+    D.add_divider(prs, 6, NPARTS, "Trust and honest limits",
+        "Non-negotiable on shared research infrastructure.", accent=D.BLUE)
+
+    s = D.add_content(prs, "The real risk is trust", None, [
+        ("Prompt injection is real.", "A web page, a pull request, or a tool's output can carry hidden instructions."),
+        ("A skill or tool is software.", "Installing one runs its code as you — accept only tools and hooks you trust."),
+    ], body_size=15, gap=16)
+    N(s, "Prompt injection is the #1 risk in the OWASP Top 10 for LLM applications: external "
+         "content the agent reads can try to alter its behavior. Defenses: least privilege "
+         "(permissions), human approval for risky actions, and treating any ingested text as "
+         "untrusted. Workspace trust means .mcp.json, hooks, and skills take effect only after you "
+         "accept them.")
+    D.source_tag(prs.slides[-1], "OWASP Gen AI Security Project, \"LLM01:2025 Prompt Injection.\"")
+
+    s = D.add_content(prs, "Your data, and your obligations", None, [
+        ("Restricted data needs approval.", "IRB, PHI, or export-controlled data must clear institutional review first."),
+        ("Disclose AI assistance.", "Follow your venue's policy, and keep the transcript as a record."),
+        ("Generated code is still yours.", "Review and license it like any other dependency you take on."),
     ])
-    N(s, "API-submitted data is not used for training by default, but check your plan's retention and "
-         "residency terms; route through Bedrock/Vertex for a BAA if you need one.")
+    N(s, "Anthropic's commercial data policy: \"By default, we will not use your inputs or outputs "
+         "from our commercial products to train our models.\" Still, check your plan's retention "
+         "and residency terms, and route through Bedrock or Vertex if you need a BAA. "
+         "Source: Anthropic Privacy Center.")
+    D.source_tag(prs.slides[-1], "Anthropic Privacy Center, \"Is my data used for model training?\"")
 
-    s = D.add_content(prs, "When not to reach for it", None, [
-        ("It can be confidently wrong.", "Invented APIs, plausible-but-broken fixes — verify everything."),
-        ("Not reproducible bit-for-bit.", "The model varies from run to run."),
-        ("Skip it for one-liners", "or for work you genuinely can't check."),
+    s = D.add_content(prs, "Where it falls short", None, [
+        ("It can be confidently wrong.", "Invented functions, plausible-but-broken fixes — verify everything it produces."),
+        ("It is not reproducible bit-for-bit.", "The model samples, so two runs can differ. Pin what must be exact."),
+        ("Skip it for trivia or the unverifiable.", "If you genuinely cannot check the output, do not ship it."),
     ])
-    N(s, "Long sessions degrade as context fills — /clear between tasks and keep prompts scoped. The "
-         "honest rule: if you can't verify the output, don't ship it.")
+    N(s, "Long sessions degrade as the context window fills — use /clear between tasks and keep "
+         "prompts scoped. The honest rule for research: anchor every result on something "
+         "deterministic — a test, an exit code, a file that must or must not exist.")
 
-    # ===================== PART G — WRAP =====================
+    # ===================== HANDS-ON =====================
+    D.add_divider(prs, None, NPARTS, "Now you try it",
+        "Everything you just saw — on a real, messy research project.",
+        accent=D.TEAL, kicker="HANDS-ON LAB", frac=1.0)
+
+    s = D.add_content(prs, "The project: LakeWatch",
+        "A small water-quality project you have just inherited — like most real projects, a little messy.", [
+        ("Open Claude Code inside it.", "`cd hands-on/project && claude` — no notebook to run; you drive the agent directly."),
+        ("Work the task cards.", "Each card in `hands-on/tasks/` gives you a prompt to paste, pointing at real files."),
+        ("It ships its own guardrails.", "A `CLAUDE.md`, a `.claude/settings.json`, slash commands, and skills — all templates to reuse."),
+    ])
+    N(s, "Learners copy hands-on/project to a git-clean scratch dir, start claude, and paste the "
+         "prompt on each task card. The project has three raw CSVs with mismatched columns and units, "
+         "a planted bug with a failing test, half-finished docs, and free-text field notes — the "
+         "everyday reality of research data.")
+
+    s = D.add_table(prs, "The tasks map to what you just learned",
+        "Six short tasks — about 45 minutes — then two optional bonuses: a Slurm batch and your own MCP tool.",
+        ["Task", "You will practise"],
+        [["1 · Get your bearings", "project memory (CLAUDE.md), letting it explore"],
+         ["2 · Tidy the messy data", "Plan mode → Accept-edits; raw data stays read-only"],
+         ["3 · Fix the bug — safely", "a guarded autonomous fix you verify yourself"],
+         ["4 · Document the project", "the writing around research; you are the reviewer"],
+         ["5 · Notes into a table", "structured extraction from documents"],
+         ["6 · Automate it", "a slash command, and a skill the model reaches for"]],
+        colw=[2.7, 5.3], row_h=0.4, body_size=11.5, hdr_size=12)
+    N(s, "Each task leaves the project in the state the next one expects. Task 3's bug is a "
+         "one-line off-by-one in a rolling mean, caught by a failing test — the same pattern the "
+         "session slide illustrated. The deny rule on the tests demonstrates that a deny is a hard veto.")
+
+    # ===================== CLOSING =====================
     s = D.add_content(prs, "Takeaways", None, [
-        ("You shape the program; the model is swappable.", "Configure the harness; the model just answers."),
-        ("It's a loop you govern.", "Advice (CLAUDE.md, skills) guides it; rules (permissions, hooks) bind it."),
-        ("Always give it a check.", "A test or an exit code — never ship what you haven't verified."),
-    ], body_size=16, gap=18)
+        ("You shape the program; the model is swappable.", "Configure the harness — the model just answers."),
+        ("It is a loop you govern.", "Advice (CLAUDE.md, skills) guides it; rules (permissions, hooks) bind it."),
+        ("Always give it a check.", "A test or an exit code — never ship what you have not verified."),
+    ], body_size=15, gap=18)
+    N(s, "By the end, attendees can install, use, govern, and scale Claude Code on Midway. The "
+         "hands-on lab makes each idea concrete on a real project.")
 
-    s = D.add_content(prs, "Next: the hands-on notebook", None, [
-        ("Run it for real.", "Your first call, memory, commands, permissions, and a live bug-fix."),
-        ("Then scale up.", "The Python Agent SDK, and a Slurm batch."),
-        ("Budget.", "The whole notebook runs on Haiku for under $1."),
-    ], body_size=16, gap=16)
-    caption_line(prs.slides[-1],
-        "Docs: code.claude.com/docs      ·      Repo: github.com/…/uchicago-workshops", y=4.75)
+    REFS_A = [
+        "Claude Code: Overview — Anthropic. code.claude.com/docs/en/overview",
+        "Advanced setup — Anthropic. code.claude.com/docs/en/setup",
+        "Authentication — Anthropic. code.claude.com/docs/en/authentication",
+        "Configure permissions — Anthropic. code.claude.com/docs/en/permissions",
+        "Choose a permission mode — Anthropic. code.claude.com/docs/en/permission-modes",
+        "Hooks reference — Anthropic. code.claude.com/docs/en/hooks",
+        "Memory (CLAUDE.md) — Anthropic. code.claude.com/docs/en/memory",
+        "Custom subagents — Anthropic. code.claude.com/docs/en/sub-agents",
+        "Extend Claude with Skills — Anthropic. code.claude.com/docs/en/skills",
+        "Connect tools via MCP — Anthropic. code.claude.com/docs/en/mcp",
+        "Run Claude Code programmatically — Anthropic. code.claude.com/docs/en/headless",
+    ]
+    REFS_B = [
+        "Agent SDK overview — Anthropic. code.claude.com/docs/en/agent-sdk/overview",
+        "Security — Anthropic. code.claude.com/docs/en/security",
+        "Pricing — Anthropic. platform.claude.com/docs/en/docs/about-claude/pricing",
+        "Building effective agents (2024) — Anthropic. anthropic.com/engineering/building-effective-agents",
+        "Equipping agents with Agent Skills (2025) — Anthropic. anthropic.com/engineering",
+        "Introducing the Model Context Protocol (2024) — Anthropic. anthropic.com/news/model-context-protocol",
+        "Model Context Protocol — modelcontextprotocol.io",
+        "Is my data used for model training? — Anthropic Privacy Center. privacy.claude.com",
+        "LLM01:2025 Prompt Injection — OWASP Gen AI Security Project. genai.owasp.org",
+        "Interactive Jobs — UChicago RCC. docs.rcc.uchicago.edu/slurm/sinteractive",
+        "Python & Jupyter — UChicago RCC. docs.rcc.uchicago.edu/software/apps-and-envs/python",
+    ]
+    D.add_references(prs, "References  (1 of 2)", REFS_A)
+    D.add_references(prs, "References  (2 of 2)", REFS_B)
 
-    D.add_divider(prs, "?", "Thank you — questions?",
-        "RCC support: help desk, user guide, and office hours — rcc.uchicago.edu.", accent=D.TEAL)
+    D.add_divider(prs, None, NPARTS, "Thank you — questions?",
+        "RCC support: user guide at docs.rcc.uchicago.edu, the help desk, and office hours.",
+        accent=D.TEAL, kicker="", frac=1.0)
 
     D.finalize(prs, OUT, skip_numbers=(1,))
     return prs
 
 
 if __name__ == "__main__":
-    media = sys.argv[1] if len(sys.argv) > 1 else "media"
-    out = sys.argv[2] if len(sys.argv) > 2 else "claude-code-tutorial.pptx"
+    media = sys.argv[1] if len(sys.argv) > 1 else "figures"
+    out = sys.argv[2] if len(sys.argv) > 2 else "../claude-code-tutorial.pptx"
     prs = build(media, out)
     n = len(prs.slides._sldIdLst)
     print(f"built {out} — {n} slides")
