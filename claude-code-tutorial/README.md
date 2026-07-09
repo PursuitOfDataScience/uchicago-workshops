@@ -22,8 +22,8 @@ claude-code-tutorial/
 ├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
 │   ├── CLAUDE.md                 #   project memory: Midway3 facts + the dataset URL
 │   ├── README.md                 #   how to start + the task index
-│   ├── 1-…8-….md                 #   Part 1: navigate Midway3 (prompts to paste)
-│   ├── 9-…17-….md                #   Part 2: analyze a dataset (prompts to paste)
+│   ├── 01-…08-….md               #   Part 1: navigate Midway3 (prompts to paste)
+│   ├── 09-…17-….md               #   Part 2: analyze a dataset (prompts to paste)
 │   └── answers.py                #   reference answers for Part 2: code + expected output
 └── README.md                     # this file
 ```

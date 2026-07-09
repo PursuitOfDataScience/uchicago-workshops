@@ -41,14 +41,14 @@ what you already know about your account.
 
 | # | Task | You ask Claude to… |
 |---|------|--------------------|
-| 1 | [Get your bearings](1-bearings.md) | say who/where you are and what this node is for |
-| 2 | [Check your disk quota](2-quota.md) | show quotas + what's using space (nothing deleted) |
-| 3 | [Your compute budget (SUs)](3-account.md) | list your allocations and how much is left |
-| 4 | [How busy is the cluster?](4-cluster.md) | break down partitions, idle vs busy nodes, free GPUs |
-| 5 | [Grab an interactive session](5-interactive.md) | hand you the exact `sinteractive` command, explained |
-| 6 | [Write a batch job script](6-batch-script.md) | generate and explain a Slurm `sbatch` script |
-| 7 | [Track your jobs](7-jobs.md) | summarize your jobs and diagnose a pending one |
-| 8 | [Find and load software](8-software.md) | find a module and give the exact `module load` line |
+| 1 | [Get your bearings](01-bearings.md) | say who/where you are and what this node is for |
+| 2 | [Check your disk quota](02-quota.md) | show quotas + what's using space (nothing deleted) |
+| 3 | [Your compute budget (SUs)](03-account.md) | list your allocations and how much is left |
+| 4 | [How busy is the cluster?](04-cluster.md) | break down partitions, idle vs busy nodes, free GPUs |
+| 5 | [Grab an interactive session](05-interactive.md) | hand you the exact `sinteractive` command, explained |
+| 6 | [Write a batch job script](06-batch-script.md) | generate and explain a Slurm `sbatch` script |
+| 7 | [Track your jobs](07-jobs.md) | summarize your jobs and diagnose a pending one |
+| 8 | [Find and load software](08-software.md) | find a module and give the exact `module load` line |
 
 ## Part 2 · Analyze a dataset
 Work these **in order, in one running session** — paste each prompt after the last one finishes and
@@ -57,7 +57,7 @@ don't restart or `/clear` between them.
 
 | # | Task | You ask Claude to… |
 |---|------|--------------------|
-| 9 | [First look](9-first-look.md) | load the data from the URL and describe it |
+| 9 | [First look](09-first-look.md) | load the data from the URL and describe it |
 | 10 | [Summary by species](10-summary-by-species.md) | group and summarize body mass & flipper length |
 | 11 | [The heaviest species](11-heaviest-species.md) | compare species and make a judgment call |
 | 12 | [Flipper length vs body mass](12-flipper-vs-mass.md) | test a relationship — overall and within groups |
