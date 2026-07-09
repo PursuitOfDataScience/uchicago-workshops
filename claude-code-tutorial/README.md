@@ -5,27 +5,26 @@ everyday **research infrastructure** on a shared HPC cluster. You will install i
 use it interactively to analyze a real dataset, keep it safe on shared hardware, and drive it
 headlessly from a single command.
 
-**Tool:** [Claude Code](https://code.claude.com/docs) v2.x &nbsp;·&nbsp; **No GPU** — this is a
-CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast, ~1¢ a call).
-
 ## The workshop has two halves
 
 1. **A lecture** — `claude-code-tutorial.pptx` (~46 slides). An accessible, plain-language
    introduction for a general research audience: what an agent in the terminal *is*, getting
    started on Midway, making it yours, staying in control, scaling up, and honest limits.
 2. **A hands-on lab** — `hands-on/`. There is **no notebook and nothing to download** — just a
-   flat folder of Markdown task cards and a `CLAUDE.md`. You open Claude Code there and ask it
-   to analyze a dataset **hosted online**; it writes and runs the analysis and reports back,
-   while you review. It is what using Claude Code for everyday data work feels like.
+   flat folder of Markdown task cards and a `CLAUDE.md`. You open Claude Code there and drive it in
+   plain English, in two parts: **Part 1** navigates Midway3 itself (quota, jobs, allocations,
+   partitions, software), and **Part 2** analyzes a dataset **hosted online**. It writes and runs
+   the commands and reports back while you review — what using Claude Code as research infra feels like.
 
 ```
 claude-code-tutorial/
 ├── claude-code-tutorial.pptx     # the lecture deck (~46 slides) — the presentation half
 ├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
-│   ├── CLAUDE.md                 #   project memory: the dataset URL + facts
+│   ├── CLAUDE.md                 #   project memory: Midway3 facts + the dataset URL
 │   ├── README.md                 #   how to start + the task index
-│   ├── 01-…09-….md               #   the task cards — just the prompt to paste; no data to download
-│   └── answers.py                #   reference answers: code + expected output for each task
+│   ├── 1-…8-….md                 #   Part 1: navigate Midway3 (prompts to paste)
+│   ├── 9-…17-….md                #   Part 2: analyze a dataset (prompts to paste)
+│   └── answers.py                #   reference answers for Part 2: code + expected output
 └── README.md                     # this file
 ```
 
@@ -43,28 +42,23 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 ```
 Check: `claude --version` should print a **2.x** build (`claude doctor` diagnoses a bad install).
 
-### 2. Authenticate (choose one)
-- **Claude.ai subscription (Pro/Max) via OAuth.** On a headless cluster you cannot open a browser
-  mid-SSH, so mint a long-lived token once and reuse it:
-  ```bash
-  claude setup-token                    # do the paste-URL flow once; prints a token
-  export CLAUDE_CODE_OAUTH_TOKEN=...     # export the token (e.g. in your job script)
-  ```
-  (Interactively, `claude` then `/login` stores credentials under `$CLAUDE_CONFIG_DIR` instead.)
-- **Console API key (pay-per-token)** — simplest for scripts and the batch exercise:
-  ```bash
-  export ANTHROPIC_API_KEY=sk-ant-...   # source from a chmod-600 file; never hard-code it
-  ```
-Credentials live under `$CLAUDE_CONFIG_DIR` (default `~/.claude`). Run `chmod 700 ~/.claude` —
-cluster home directories are sometimes group-readable.
+### 2. Authenticate
+Just start Claude Code and log in from inside it — no tokens to mint by hand:
+```bash
+claude          # start it, then type:
+/login          # follow the prompt: open the URL it prints, authorize, paste the code back
+```
+That's it. Log in once with your Claude.ai account (Pro/Max) and the credentials are saved under
+`$CLAUDE_CONFIG_DIR` (default `~/.claude`), so later `claude` and `claude -p` runs on that node
+just work.
 
-### 3. Network requirement (read this)
-Claude Code needs **egress to `api.anthropic.com`**. On **Midway3**, **login nodes and the
-`test`/`caslake` partitions have egress**; many other clusters' compute nodes do **not**. Work on
-a node with internet. See the RCC user guide:
-[docs.rcc.uchicago.edu](https://docs.rcc.uchicago.edu/slurm/sinteractive/).
+Run `chmod 700 ~/.claude` afterwards — cluster home directories are sometimes group-readable.
 
-### 4. On Midway3
+> **Scripts / batch jobs only:** if you'd rather not log in interactively, export a Console API
+> key instead — `export ANTHROPIC_API_KEY=sk-ant-...` (source it from a `chmod 600` file; never
+> hard-code it). For interactive use, `/login` is the easy path.
+
+### 3. On Midway3
 Request an interactive job (no GPU needed), then activate the shared environment used across this
 workshop series:
 ```bash
@@ -79,40 +73,16 @@ Work on a node with internet, then:
 cd hands-on          # (or copy the folder somewhere writable and cd there)
 claude
 ```
-Then follow the task cards in order, pasting each prompt. Claude reads a **hosted dataset**
-(Palmer Penguins — from a URL, nothing to download), writes and runs the analysis, and reports
-back; you approve each step and check the numbers. Full instructions and the task index are in
-[`hands-on/README.md`](hands-on/README.md). The core is **seven short analyses (~40 min)** — a
-first look, per-species summaries, a comparison, a correlation, a data-quality audit, a saved
-figure, and a written-up Results paragraph — then a headless bonus and a bring-your-own-data take-home.
-
-## Cost expectations (measured)
-| Activity | Approx cost |
-|---|---|
-| one headless `haiku` call | ~$0.01 |
-| the seven-task interactive lab on `haiku` | well under $1 |
-| a focused interactive hour on a stronger model | ~$2–6 |
-
-For a live workshop, ask attendees to **install and authenticate before arriving** (~10 min). Note
-that dozens of simultaneous `claude` calls from one org key will hit rate limits — provision
-per-attendee keys or stagger usage.
-
-## Safety on shared HPC (please teach this)
-- **Permission ladder.** *Plan* mode to explore → *Accept-edits* only inside a **git-clean scratch
-  repo** → **never `--dangerously-skip-permissions` on a shared filesystem.** A bad `rm`/`chmod`
-  in `/project` hits your whole lab.
-- **Claude can read anything you can read.** Homes hold `~/.ssh`, `~/.netrc`, tokens. Start it from
-  your *project* dir, not `$HOME`, and add deny rules in a `.claude/settings.json`:
-  ```json
-  { "permissions": { "deny": ["Read(~/.ssh/**)", "Read(**/.env)", "Bash(rm -rf:*)"] } }
-  ```
-- **Slurm secret leak.** `sbatch --export=ALL` copies `ANTHROPIC_API_KEY` into the job environment,
-  visible via `scontrol`. Prefer the `CLAUDE_CONFIG_DIR` login token, or source a `chmod 600` key
-  file at runtime.
-- **Data governance.** By default Anthropic does not train on commercial API inputs, but IRB/PHI/
-  export-controlled data must not be sent without institutional approval.
+Then follow the task cards, pasting each prompt and checking Claude's work. **Part 1 (Tasks 1–8)**
+has Claude navigate Midway3 itself — your disk quota, your jobs, your allocation balance, cluster
+and partition load, interactive sessions, batch scripts, and software modules — by running the
+RCC/Slurm commands for you and explaining the output (read-only; nothing is submitted or deleted).
+**Part 2 (Tasks 9–17, ~40 min)** points it at a **hosted dataset** (Palmer Penguins — from a URL,
+nothing to download) for a short analysis: a first look, per-species summaries, a comparison, a
+correlation, a data-quality audit, a saved figure, and a written-up Results paragraph — then a
+headless bonus and a bring-your-own-data take-home. Full instructions and both task indexes are in
+[`hands-on/README.md`](hands-on/README.md).
 
 ## Documentation
 Claude Code: [`code.claude.com/docs`](https://code.claude.com/docs) &nbsp;·&nbsp; RCC user guide:
-[`docs.rcc.uchicago.edu`](https://docs.rcc.uchicago.edu) &nbsp;·&nbsp; the lecture's References
-slides list the primary sources for every claim.
+[`docs.rcc.uchicago.edu`](https://docs.rcc.uchicago.edu).
