@@ -2,8 +2,8 @@
 
 A hands-on workshop that introduces **Claude Code** — Anthropic's AI *coding agent* — as
 everyday **research infrastructure** on a shared HPC cluster. You will install it on Midway,
-use it interactively on a real (messy) research project, keep it safe on shared hardware, and
-scale one command into an unattended batch job.
+use it interactively to analyze a real dataset, keep it safe on shared hardware, and drive it
+headlessly from a single command.
 
 **Tool:** [Claude Code](https://code.claude.com/docs) v2.x &nbsp;·&nbsp; **No GPU** — this is a
 CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast, ~1¢ a call).
@@ -13,9 +13,10 @@ CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast,
 1. **A lecture** — `claude-code-tutorial.pptx` (~41 slides). An accessible, plain-language
    introduction for a general research audience: what an agent in the terminal *is*, getting
    started on Midway, making it yours, staying in control, scaling up, and honest limits.
-2. **A hands-on lab** — `hands-on/`. There is **no notebook to run**. Instead you open Claude
-   Code inside a small research project and work through a set of **task cards**, pasting the
-   prompt on each card. It is exactly what you will do on your own work afterward.
+2. **A hands-on lab** — `hands-on/`. There is **no notebook and nothing to download** — just a
+   flat folder of Markdown task cards and a `CLAUDE.md`. You open Claude Code there and ask it
+   to analyze a dataset **hosted online**; it writes and runs the analysis and reports back,
+   while you review. It is what using Claude Code for everyday data work feels like.
 
 ```
 claude-code-tutorial/
@@ -27,10 +28,10 @@ claude-code-tutorial/
 │   ├── render_preview.py         #   render the .pptx to PNGs without LibreOffice
 │   ├── figures/                  #   the embedded diagrams and terminal mockups
 │   └── BUILD.md
-├── hands-on/                     # the interactive lab — the second half
+├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
+│   ├── CLAUDE.md                 #   project memory: the dataset URL + how to work
 │   ├── README.md                 #   how to start + the task index
-│   ├── project/                  #   "LakeWatch": a small, messy research repo you work on
-│   └── tasks/                    #   the guided task cards (paste the prompts)
+│   └── 01-…09-….md               #   the task cards — paste each prompt; no data to download
 └── README.md                     # this file
 ```
 
@@ -79,16 +80,17 @@ export DISABLE_AUTOUPDATER=1              # pin CLI behaviour during the session
 ```
 
 ## Running the hands-on lab
-Everything happens in `hands-on/`. In short:
+Work on a node with internet, then:
 ```bash
-mkdir -p ~/cc-lab && cp -r hands-on/project ~/cc-lab/lakewatch   # a git-clean scratch copy
-cd ~/cc-lab/lakewatch && git init -q && git add -A && git commit -qm start
-claude                                          # start the agent; then follow hands-on/tasks/
+cd hands-on          # (or copy the folder somewhere writable and cd there)
+claude
 ```
-Full instructions and the task index are in [`hands-on/README.md`](hands-on/README.md). The core
-is six short tasks (~45 min): get oriented, clean messy data, fix a bug under guardrails, document
-the project, turn field notes into a table, and automate with a command and a skill. Two optional
-bonuses cover a headless Slurm batch and a small MCP tool server.
+Then follow the task cards in order, pasting each prompt. Claude reads a **hosted dataset**
+(Palmer Penguins — from a URL, nothing to download), writes and runs the analysis, and reports
+back; you approve each step and check the numbers. Full instructions and the task index are in
+[`hands-on/README.md`](hands-on/README.md). The core is **seven short analyses (~40 min)** — a
+first look, per-species summaries, a comparison, a correlation, a data-quality audit, a saved
+figure, and a written-up Results paragraph — then a headless bonus and a bring-your-own-data take-home.
 
 ## Rebuilding the lecture deck (optional)
 The deck is generated from `deck-src/` so it can be re-edited reproducibly — edit the wording in
@@ -104,19 +106,19 @@ python render_preview.py ../claude-code-tutorial.pptx preview   # optional PNG p
 | Activity | Approx cost |
 |---|---|
 | one headless `haiku` call | ~$0.01 |
-| the bonus batch (a handful of logs) | a few cents |
+| the seven-task interactive lab on `haiku` | well under $1 |
 | a focused interactive hour on a stronger model | ~$2–6 |
 
 For a live workshop, ask attendees to **install and authenticate before arriving** (~10 min). Note
 that dozens of simultaneous `claude` calls from one org key will hit rate limits — provision
-per-attendee keys or stagger the batch exercise.
+per-attendee keys or stagger usage.
 
 ## Safety on shared HPC (please teach this)
 - **Permission ladder.** *Plan* mode to explore → *Accept-edits* only inside a **git-clean scratch
   repo** → **never `--dangerously-skip-permissions` on a shared filesystem.** A bad `rm`/`chmod`
   in `/project` hits your whole lab.
 - **Claude can read anything you can read.** Homes hold `~/.ssh`, `~/.netrc`, tokens. Start it from
-  the *project* dir, not `$HOME`, and add deny rules (see `hands-on/project/.claude/settings.json`):
+  your *project* dir, not `$HOME`, and add deny rules in a `.claude/settings.json`:
   ```json
   { "permissions": { "deny": ["Read(~/.ssh/**)", "Read(**/.env)", "Bash(rm -rf:*)"] } }
   ```

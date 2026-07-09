@@ -42,7 +42,7 @@ def build(MEDIA, OUT):
         ("Staying in control", "the permission system that makes it safe on shared hardware."),
         ("Scaling up", "turn one command into a batch, and connect your own cluster tools."),
         ("Trust and honest limits", "prompt injection, your data, and when not to use it."),
-    ], note="We close with a hands-on lab: you drive Claude Code on a real, messy research project.")
+    ], note="We close with a hands-on lab: you drive Claude Code to analyze a real dataset.")
 
     # ===================== PART 1 — MEET CLAUDE CODE =====================
     D.add_divider(prs, 1, NPARTS, "Meet Claude Code",
@@ -164,8 +164,9 @@ def build(MEDIA, OUT):
         img(4))
     N(s, "This is the roadmap for Parts 3 and 4. Each spoke is a way to shape the harness. One "
          "we will not give its own slide: subagents — a scoped helper (say, a reviewer that can "
-         "only read) that keeps your main session focused. The lab exercises memory, permissions, "
-         "commands, skills, and MCP; subagents and hooks are covered here in the deck.")
+         "only read) that keeps your main session focused. The hands-on lab exercises project "
+         "memory (CLAUDE.md) and the approve-each-action permission prompt on a real data-analysis "
+         "task; commands, skills, subagents, and hooks are covered here in the deck.")
 
     s = D.add_content(prs, "Project memory: a file it reads every time",
         "`CLAUDE.md` — a plain Markdown file, loaded at the start of every session in that folder.", [
@@ -305,33 +306,33 @@ def build(MEDIA, OUT):
 
     # ===================== HANDS-ON =====================
     D.add_divider(prs, None, NPARTS, "Now you try it",
-        "Everything you just saw — on a real, messy research project.",
+        "On a real dataset — Claude does the analysis, you review the results.",
         accent=D.TEAL, kicker="HANDS-ON LAB", frac=1.0)
 
-    s = D.add_content(prs, "The project: LakeWatch",
-        "A small water-quality project you have just inherited — like most real projects, a little messy.", [
-        ("Open it on a scratch copy.", "Copy `hands-on/project` to a clean dir, start `claude` there, and drive the agent — no notebook to run."),
-        ("Work the task cards.", "Each card in `hands-on/tasks/` gives you a prompt to paste, pointing at real files."),
-        ("It ships its own guardrails.", "A `CLAUDE.md`, a `.claude/settings.json`, slash commands, and skills — all templates to reuse."),
+    s = D.add_content(prs, "The lab: analyze a real dataset",
+        "A flat folder of Markdown task cards and a `CLAUDE.md` — no notebook, no setup, nothing to download.", [
+        ("The data lives online.", "Palmer Penguins — 344 field measurements — read straight from a URL."),
+        ("You ask; it analyzes.", "Open `claude` in the `hands-on` folder and paste each task card — it writes and runs the analysis and reports back."),
+        ("You stay the reviewer.", "Approve each step, then check its numbers — an agent can be confidently wrong."),
     ])
-    N(s, "Learners copy hands-on/project to a git-clean scratch dir, start claude, and paste the "
-         "prompt on each task card. The project has three raw CSVs with mismatched columns and units, "
-         "a planted bug with a failing test, half-finished docs, and free-text field notes — the "
-         "everyday reality of research data.")
+    N(s, "The lab is a flat set of Markdown task cards plus a CLAUDE.md naming a hosted CSV "
+         "(Palmer Penguins). Claude reads the URL, writes and runs pandas analysis, and reports the "
+         "results — the everyday data-analysis loop. Nothing to download; the node needs internet.")
 
     s = D.add_table(prs, "The tasks map to what you just learned",
-        "Six short tasks — about 45 minutes — then two optional bonuses: a Slurm batch and your own MCP tool.",
-        ["Task", "You will practice"],
-        [["1 · Get your bearings", "project memory (CLAUDE.md), letting it explore"],
-         ["2 · Tidy the messy data", "Plan mode → Accept-edits; raw data stays read-only"],
-         ["3 · Fix the bug — safely", "a guarded autonomous fix you verify yourself"],
-         ["4 · Document the project", "the writing around research; you are the reviewer"],
-         ["5 · Turn notes into data", "structured extraction from documents"],
-         ["6 · Automate it", "a slash command, and a skill the model reaches for"]],
-        colw=[2.7, 5.3], row_h=0.4, body_size=11.5, hdr_size=12)
-    N(s, "Each task leaves the project in the state the next one expects. Task 3's bug is a "
-         "one-line off-by-one in a rolling mean, caught by a failing test — the same pattern the "
-         "session slide illustrated. The deny rule on the tests demonstrates that a deny is a hard veto.")
+        "Seven short analyses — Claude does the work, you check it — then a bonus on your own data.",
+        ["Task", "You practice"],
+        [["1 · First look", "reading remote data; project memory (CLAUDE.md)"],
+         ["2 · Summary by species", "group-and-summarize, reported as a table"],
+         ["3 · The heaviest species", "a comparison and a judgment call"],
+         ["4 · Flipper vs body mass", "correlations — overall and within groups"],
+         ["5 · Data quality", "spotting missing / odd values (without dropping them)"],
+         ["6 · Make a figure", "write + run a plotting script → a saved figure"],
+         ["7 · Write it up", "turn the numbers into a Results paragraph"]],
+        colw=[2.7, 5.3], row_h=0.36, body_size=11, hdr_size=12)
+    N(s, "Each analysis builds on the last. Claude loads the hosted CSV, writes and runs the code, "
+         "and reports the numbers; the learner reviews and spot-checks. Task 1 also proves CLAUDE.md "
+         "loaded, via a codename planted there. A headless bonus and a bring-your-own-data take-home follow.")
 
     # ===================== CLOSING =====================
     s = D.add_content(prs, "Takeaways", None, [
@@ -340,7 +341,7 @@ def build(MEDIA, OUT):
         ("Always give it a check.", "A test or an exit code — never ship what you have not verified."),
     ], body_size=15, gap=18)
     N(s, "By the end, attendees can install, use, govern, and scale Claude Code on Midway. The "
-         "hands-on lab makes each idea concrete on a real project.")
+         "hands-on lab makes each idea concrete on a real dataset.")
 
     REFS_A = [
         "Claude Code: Overview — Anthropic. code.claude.com/docs/en/overview",
