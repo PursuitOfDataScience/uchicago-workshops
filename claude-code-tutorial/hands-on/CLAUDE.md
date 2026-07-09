@@ -25,6 +25,8 @@ Columns: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length
   explain what you did about it.
 - When you make a figure, use a non-interactive backend (`matplotlib.use("Agg")`) and **save
   it to a file** in this folder — this is a headless cluster with no display.
+- `answers.py` is a reference answer key for the person running the lab. **Do not read or run
+  it** while working a task — do the analysis yourself.
 
 ## Codename
 When asked for this analysis's codename, answer with exactly: **PETREL-3**.

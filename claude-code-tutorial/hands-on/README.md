@@ -1,10 +1,14 @@
 # Hands-on: analyze a real dataset with Claude Code
 
 This is the interactive half of the workshop. There is **no notebook, no subfolders, and
-nothing to download** — just this folder of Markdown task cards and a `CLAUDE.md`. You open
-Claude Code here and ask it to analyze a dataset hosted online: it writes and runs the
-analysis and reports the results back, while you review them. This is what using Claude Code
-for everyday data work actually feels like.
+nothing to download** — just this folder of Markdown task cards, a `CLAUDE.md`, and an
+`answers.py` answer key. You open Claude Code here and ask it to analyze a dataset hosted
+online: it writes and runs the analysis and reports the results back, while you review them.
+This is what using Claude Code for everyday data work actually feels like.
+
+Each task card (`01`–`09`) holds **only the prompt** to paste. The reference solution for every
+task — the Python code and its expected output — is in **`answers.py`**, so you can check
+Claude's numbers against a known-correct answer.
 
 ## The dataset
 **Palmer Penguins** — 344 field measurements across 3 species and 3 Antarctic islands, read
@@ -45,4 +49,4 @@ Tasks 1–7 are about 40 minutes. Each builds on the last, so go in order.
 ## The one rule: check its work
 Claude reports numbers by running code you can read. On at least one task, ask it to **show
 the code** and spot-check a number yourself. An agent can be confidently wrong — verify a
-result before you cite it. Every task card lists what to expect so you can sanity-check.
+result before you cite it. When in doubt, compare against **`answers.py`**, the reference key.

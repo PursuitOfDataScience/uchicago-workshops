@@ -310,7 +310,7 @@ def build(MEDIA, OUT):
         accent=D.TEAL, kicker="HANDS-ON LAB", frac=1.0)
 
     s = D.add_content(prs, "The lab: analyze a real dataset",
-        "A flat folder of Markdown task cards and a `CLAUDE.md` — no notebook, no setup, nothing to download.", [
+        "A flat folder: Markdown task cards, a `CLAUDE.md`, and an `answers.py` key — no notebook, nothing to download.", [
         ("The data lives online.", "Palmer Penguins — 344 field measurements — read straight from a URL."),
         ("You ask; it analyzes.", "Open `claude` in the `hands-on` folder and paste each task card — it writes and runs the analysis and reports back."),
         ("You stay the reviewer.", "Approve each step, then check its numbers — an agent can be confidently wrong."),

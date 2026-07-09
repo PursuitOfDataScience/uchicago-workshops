@@ -31,7 +31,8 @@ claude-code-tutorial/
 ├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
 │   ├── CLAUDE.md                 #   project memory: the dataset URL + how to work
 │   ├── README.md                 #   how to start + the task index
-│   └── 01-…09-….md               #   the task cards — paste each prompt; no data to download
+│   ├── 01-…09-….md               #   the task cards — just the prompt to paste; no data to download
+│   └── answers.py                #   reference answers: code + expected output for each task
 └── README.md                     # this file
 ```
 
