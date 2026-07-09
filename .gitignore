@@ -4,6 +4,9 @@
 /experiments.md
 /experiments/
 
+# Deck build tooling — kept local; workshop attendees need only the .pptx, not the source.
+/claude-code-tutorial/deck-src/
+
 # Python / build artifacts
 __pycache__/
 *.py[cod]

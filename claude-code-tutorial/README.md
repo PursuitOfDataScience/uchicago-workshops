@@ -21,15 +21,8 @@ CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast,
 ```
 claude-code-tutorial/
 ├── claude-code-tutorial.pptx     # the lecture deck (~46 slides) — the presentation half
-├── deck-src/                     # scripts + figures that generate the deck (edit + rebuild)
-│   ├── build_deck.py             #   slide content (edit wording here)
-│   ├── deck_engine.py            #   the design system (layout, palette, slide types)
-│   ├── make_figures.py           #   regenerates the diagrams that must track the content
-│   ├── render_preview.py         #   render the .pptx to PNGs without LibreOffice
-│   ├── figures/                  #   the embedded diagrams and terminal mockups
-│   └── BUILD.md
 ├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
-│   ├── CLAUDE.md                 #   project memory: the dataset URL + how to work
+│   ├── CLAUDE.md                 #   project memory: the dataset URL + facts
 │   ├── README.md                 #   how to start + the task index
 │   ├── 01-…09-….md               #   the task cards — just the prompt to paste; no data to download
 │   └── answers.py                #   reference answers: code + expected output for each task
@@ -92,16 +85,6 @@ back; you approve each step and check the numbers. Full instructions and the tas
 [`hands-on/README.md`](hands-on/README.md). The core is **seven short analyses (~40 min)** — a
 first look, per-species summaries, a comparison, a correlation, a data-quality audit, a saved
 figure, and a written-up Results paragraph — then a headless bonus and a bring-your-own-data take-home.
-
-## Rebuilding the lecture deck (optional)
-The deck is generated from `deck-src/` so it can be re-edited reproducibly — edit the wording in
-`build_deck.py` and rebuild:
-```bash
-cd deck-src
-python make_figures.py figures                        # regenerate the generated diagrams
-python build_deck.py figures ../claude-code-tutorial.pptx
-python render_preview.py ../claude-code-tutorial.pptx preview   # optional PNG preview (no LibreOffice)
-```
 
 ## Cost expectations (measured)
 | Activity | Approx cost |

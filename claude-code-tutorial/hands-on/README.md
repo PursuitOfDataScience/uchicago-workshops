@@ -27,9 +27,11 @@ live from a URL (see `CLAUDE.md`). Nothing to download.
 cd hands-on        # (or copy this folder somewhere writable and cd there)
 claude
 ```
-Then work the task cards in order, pasting each prompt. When Claude asks to **run a command**
-(to load the data or save a plot), approve it — that approval prompt is the permission system
-from the lecture, live.
+Work the task cards **in order, in one running session** — paste each prompt after the last one
+finishes, and let the conversation continue. Later tasks build on what Claude already did (Task 7
+sums up the earlier ones), so don't restart or `/clear` between them. When Claude asks to **run a
+command** (to load the data or save a plot), approve it — that approval prompt is the permission
+system from the lecture, live.
 
 ## The tasks
 | # | Task | You ask Claude to… |
