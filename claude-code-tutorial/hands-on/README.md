@@ -36,15 +36,15 @@ system from the lecture, live.
 ## The tasks
 | # | Task | You ask Claude to… |
 |---|------|--------------------|
-| 1 | [First look](01-first-look.md) | load the data from the URL and describe it |
-| 2 | [Summary by species](02-summary-by-species.md) | group and summarize body mass & flipper length |
-| 3 | [The heaviest species](03-heaviest-species.md) | compare species and make a judgment call |
-| 4 | [Flipper length vs body mass](04-flipper-vs-mass.md) | test a relationship — overall and within groups |
-| 5 | [Data quality](05-data-quality.md) | find missing / implausible values (without dropping them) |
-| 6 | [Make a figure](06-make-a-figure.md) | write and run a plotting script → a saved figure |
-| 7 | [Write it up](07-write-it-up.md) | turn the numbers into a Results paragraph |
-| B | [Bonus: run it headless](08-headless.md) | get the same analysis as one `claude -p` command |
-| ★ | [Take-home: your own data](09-your-own-data.md) | point it at a CSV URL of your own |
+| 1 | [First look](1-first-look.md) | load the data from the URL and describe it |
+| 2 | [Summary by species](2-summary-by-species.md) | group and summarize body mass & flipper length |
+| 3 | [The heaviest species](3-heaviest-species.md) | compare species and make a judgment call |
+| 4 | [Flipper length vs body mass](4-flipper-vs-mass.md) | test a relationship — overall and within groups |
+| 5 | [Data quality](5-data-quality.md) | find missing / implausible values (without dropping them) |
+| 6 | [Make a figure](6-make-a-figure.md) | write and run a plotting script → a saved figure |
+| 7 | [Write it up](7-write-it-up.md) | turn the numbers into a Results paragraph |
+| B | [Bonus: run it headless](8-headless.md) | get the same analysis as one `claude -p` command |
+| ★ | [Take-home: your own data](9-your-own-data.md) | point it at a CSV URL of your own |
 
 Tasks 1–7 are about 40 minutes. Each builds on the last, so go in order.
 
