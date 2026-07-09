@@ -7,6 +7,7 @@
       "Edit(data/clean/**)",
       "Write(data/clean/**)",
       "Edit(docs/**)",
+      "Write(docs/**)",
       "Edit(figures/**)",
       "Write(figures/**)",
       "Bash(python:*)",

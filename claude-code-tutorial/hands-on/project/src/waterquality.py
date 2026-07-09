@@ -40,9 +40,9 @@ def sample_std(values):
 def rolling_mean(values, window):
     """Trailing moving average over `window` consecutive points.
 
-    For a series of length n and a window of size k, there are k positions less
-    than the end plus the final full window, so this returns n - k + 1 averages
-    (e.g. 5 points with a window of 3 gives 3 averages).
+    For a series of length n and a window of size k, the window can sit in
+    n - k + 1 positions, so this returns n - k + 1 averages (e.g. 5 points with
+    a window of 3 gives 3 averages).
     """
     k = window
     if k < 1 or k > len(values):

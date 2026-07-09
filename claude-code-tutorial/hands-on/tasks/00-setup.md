@@ -12,9 +12,11 @@ work on a **copy** under a git-clean scratch directory — never on your only co
 claude --version          # expect a 2.x build
 claude /status            # or run `claude` and type /status — shows your account + model
 
-# 2. Copy the project to a scratch dir and make it a fresh git repo.
-cp -r hands-on/project ~/scratch/lakewatch
-cd ~/scratch/lakewatch
+# 2. Copy the project to a fresh dir and make it a git repo.
+#    (run this from the claude-code-tutorial directory)
+mkdir -p ~/cc-lab
+cp -r hands-on/project ~/cc-lab/lakewatch
+cd ~/cc-lab/lakewatch
 git init -q && git add -A && git commit -qm "start"
 
 # 3. Confirm the failing test (this is the bug you will fix in Task 3).

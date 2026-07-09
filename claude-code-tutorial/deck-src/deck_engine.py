@@ -95,6 +95,14 @@ def _rich(p, text, size, color=INK, bold=False, italic=False, code_color=TEAL):
                 _run(p, sub, size, color, bold=bold, italic=(italic or j % 2 == 1))
 
 
+def _hang(p, marL_in=0.3):
+    """Give a bulleted paragraph a hanging indent so wrapped lines align under the
+    lead text, not back at the bullet glyph."""
+    pPr = p._p.get_or_add_pPr()
+    pPr.set('marL', str(Inches(marL_in)))
+    pPr.set('indent', str(Inches(-marL_in)))
+
+
 def _rect(slide, x, y, w, h, color, line=None):
     sp = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
     sp.fill.solid(); sp.fill.fore_color.rgb = color
@@ -189,13 +197,14 @@ def add_content(prs, title, caption, bullets, accent=TEAL, body_size=15, gap=13,
     Bodies may contain `code` spans and *emphasis*."""
     s = _blank(prs)
     top = _title_block(s, title, caption, accent)
-    tb, tf = _txt(s, M, top, SW - 2 * M, BODY_BOTTOM - top, anchor=MSO_ANCHOR.MIDDLE)
+    tb, tf = _txt(s, M, top + 0.28, SW - 2 * M, BODY_BOTTOM - top - 0.28, anchor=MSO_ANCHOR.TOP)
     first = True
     for lead, body in bullets:
         p = tf.paragraphs[0] if first else tf.add_paragraph()
         first = False
         p.space_after = Pt(gap)
         p.line_spacing = 1.08
+        _hang(p, 0.3)
         _run(p, "•  ", body_size, accent, bold=True)
         if lead:
             _rich(p, lead, body_size, BLUE, bold=True)   # _rich so `code` in a lead never shows literal backticks
@@ -224,6 +233,7 @@ def add_two_column(prs, title, caption, left, right, accent=TEAL):
             pp = tf.paragraphs[0] if firstp else tf.add_paragraph()
             firstp = False
             pp.space_after = Pt(8); pp.line_spacing = 1.06
+            _hang(pp, 0.24)
             _run(pp, "•  ", 13, accent, bold=True)
             _rich(pp, ln, 13, INK)
     return s

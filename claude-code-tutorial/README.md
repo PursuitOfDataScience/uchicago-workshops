@@ -81,8 +81,8 @@ export DISABLE_AUTOUPDATER=1              # pin CLI behaviour during the session
 ## Running the hands-on lab
 Everything happens in `hands-on/`. In short:
 ```bash
-cp -r hands-on/project ~/scratch/lakewatch     # work on a git-clean scratch copy
-cd ~/scratch/lakewatch && git init -q && git add -A && git commit -qm start
+mkdir -p ~/cc-lab && cp -r hands-on/project ~/cc-lab/lakewatch   # a git-clean scratch copy
+cd ~/cc-lab/lakewatch && git init -q && git add -A && git commit -qm start
 claude                                          # start the agent; then follow hands-on/tasks/
 ```
 Full instructions and the task index are in [`hands-on/README.md`](hands-on/README.md). The core
@@ -118,7 +118,7 @@ per-attendee keys or stagger the batch exercise.
 - **Claude can read anything you can read.** Homes hold `~/.ssh`, `~/.netrc`, tokens. Start it from
   the *project* dir, not `$HOME`, and add deny rules (see `hands-on/project/.claude/settings.json`):
   ```json
-  { "permissions": { "deny": ["Read(~/.ssh/**)", "Read(**/.env)", "Bash(rm -rf*)"] } }
+  { "permissions": { "deny": ["Read(~/.ssh/**)", "Read(**/.env)", "Bash(rm -rf:*)"] } }
   ```
 - **Slurm secret leak.** `sbatch --export=ALL` copies `ANTHROPIC_API_KEY` into the job environment,
   visible via `scontrol`. Prefer the `CLAUDE_CONFIG_DIR` login token, or source a `chmod 600` key

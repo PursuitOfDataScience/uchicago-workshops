@@ -1,7 +1,7 @@
 # Bonus B · Give it your own tools (MCP)
 
 **Goal:** let Claude call a tool *you* wrote — a database, a `squeue` wrapper, an internal API.
-**You'll practise:** the Model Context Protocol (MCP), how Claude Code becomes cluster-native.
+**You'll practice:** the Model Context Protocol (MCP), how Claude Code becomes cluster-native.
 
 Some questions the data files can't answer — where a site is, which sensors are online. This
 project ships a tiny MCP server (`mcp_server.py`, no dependencies) that exposes two such tools.

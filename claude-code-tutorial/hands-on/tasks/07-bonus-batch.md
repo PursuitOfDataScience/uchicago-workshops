@@ -1,7 +1,7 @@
 # Bonus A · Scale to a batch
 
 **Goal:** run the same agent call over many files, unattended, with the bill printed at the end.
-**You'll practise:** headless `claude -p` and the leap from one call to a Slurm job.
+**You'll practice:** headless `claude -p` and the leap from one call to a Slurm job.
 
 Everything so far was interactive. The same agent runs **headless**: one prompt in, one
 machine-readable answer out — the building block of any pipeline.
@@ -26,7 +26,8 @@ bash classify_logs.sh
 ```
 
 `run.sh` submits the exact same batch as an unattended Slurm job (it preflights one cheap
-call first, so a node with no internet fails in seconds, not after a long wait):
+call first, so a node with no internet fails in seconds, not after a long wait). **First edit
+`run.sh` and set `#SBATCH --account=` to your PI allocation** — it ships with a placeholder:
 
 ```bash
 sbatch --export=ALL,CLAUDE_CONFIG_DIR=$HOME/.claude run.sh

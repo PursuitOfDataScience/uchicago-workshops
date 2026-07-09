@@ -1,7 +1,7 @@
 # Task 1 · Get your bearings
 
 **Goal:** understand a project you have just inherited — without reading every file yourself.
-**You'll practise:** letting the agent explore your codebase, and seeing project memory (`CLAUDE.md`) at work.
+**You'll practice:** letting the agent explore your codebase, and seeing project memory (`CLAUDE.md`) at work.
 
 ## Do this — paste into Claude Code
 

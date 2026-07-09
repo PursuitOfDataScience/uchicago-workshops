@@ -40,7 +40,7 @@ def build(MEDIA, OUT):
         ("Getting started on Midway", "install, log in, and run your first session."),
         ("Make it yours", "teach it your project, save prompts, add your own tools."),
         ("Staying in control", "the permission system that makes it safe on shared hardware."),
-        ("Scaling up", "turn one command into a batch over thousands of inputs."),
+        ("Scaling up", "turn one command into a batch, and connect your own cluster tools."),
         ("Trust and honest limits", "prompt injection, your data, and when not to use it."),
     ], note="We close with a hands-on lab: you drive Claude Code on a real, messy research project.")
 
@@ -82,7 +82,7 @@ def build(MEDIA, OUT):
     s = D.add_content(prs, "It finds its way around your project", None, [
         ("It looks the way you do.", "It searches and opens your real files — nothing to index or set up first."),
         ("Your layout is its context.", "A tidy project folder helps it find the right things quickly."),
-        ("It checks its own work.", "A test, an exit code, or a linter confirms a change actually worked."),
+        ("It checks its own work.", "A test passing, a program finishing cleanly, or a code checker confirms the change worked."),
     ])
     N(s, "'Context' is everything the agent currently has in view. Unlike a search engine that "
          "builds an index first, there is nothing to embed and nothing to go stale — it reads the "
@@ -146,9 +146,9 @@ def build(MEDIA, OUT):
          "the current version; pin a full model id in shared configs. The lab runs on Haiku.")
 
     s = D.add_content(prs, "A few moves worth knowing", None, [
-        ("Shift+Tab", "cycles how much it may do on its own — from ask-first, to read-only plan, to auto-edit."),
+        ("Shift+Tab", "cycles the permission mode — ask-first, then auto-edit, then read-only plan."),
         ("Esc, then Esc Esc", "stops it; or rewinds to before its last edit (a local checkpoint)."),
-        ("/cost  ·  /clear  ·  /help", "check spend, start a fresh context, or list every command."),
+        ("/cost  ·  /clear  ·  /help", "check spend, clear its memory for a fresh start, or list every command."),
     ], body_size=14.5, gap=14)
     N(s, "Also useful: '#' jots a quick note into project memory, '@' mentions a file, '/status' "
          "shows your account and model. Sessions are saved to disk: '--resume' continues one and "
@@ -164,7 +164,8 @@ def build(MEDIA, OUT):
         img(4))
     N(s, "This is the roadmap for Parts 3 and 4. Each spoke is a way to shape the harness. One "
          "we will not give its own slide: subagents — a scoped helper (say, a reviewer that can "
-         "only read) that keeps your main session focused. You meet all of these in the lab.")
+         "only read) that keeps your main session focused. The lab exercises memory, permissions, "
+         "commands, skills, and MCP; subagents and hooks are covered here in the deck.")
 
     s = D.add_content(prs, "Project memory: a file it reads every time",
         "`CLAUDE.md` — a plain Markdown file, loaded at the start of every session in that folder.", [
@@ -183,7 +184,7 @@ def build(MEDIA, OUT):
          "This is the prompt YOU fire — contrast with a skill, next. Source: Claude Code commands docs.")
 
     s = D.add_image(prs, "Skills: abilities the model reaches for itself",
-        "You do not call it — the model loads it when your request matches its description.", img(6),
+        "You do not call a skill — the model reaches for it when your request matches its description.", img(6),
         source="Agent Skills: Anthropic, \"Equipping agents for the real world with Agent Skills\" (2025).")
     N(s, "A skill is a folder (SKILL.md plus optional scripts and reference files). Progressive "
          "disclosure: the one-line description is always in view (cheap); the body loads only when "
@@ -198,8 +199,8 @@ def build(MEDIA, OUT):
         "Shift+Tab cycles these. You set the mode — the model cannot change it.",
         ["Mode", "What it does"],
         [["Ask first (default)", "Reads freely; asks before its first edit or command"],
-         ["Plan", "Read-only — it proposes changes but makes none"],
-         ["Accept edits", "Approves its own edits inside the current folder"]],
+         ["Accept edits", "Approves its own edits inside the current folder"],
+         ["Plan", "Read-only — it proposes changes but makes none"]],
         colw=[2.3, 5.7], row_h=0.6, body_size=13)
     caption_line(prs.slides[-1],
         "A fourth mode skips all checks — only ever in a throwaway container or VM, never on shared files.",
@@ -242,7 +243,7 @@ def build(MEDIA, OUT):
 
     # ===================== PART 5 — SCALING UP =====================
     D.add_divider(prs, 5, NPARTS, "Scaling up",
-        "From one command to a batch over thousands of inputs.")
+        "From one command to a batch — and out to your own cluster tools.")
 
     s = D.add_image(prs, "One command, a structured answer",
         "One turn in, one machine-readable object out — the building block of every pipeline.",
@@ -260,7 +261,7 @@ def build(MEDIA, OUT):
          "— stagger them or use per-user keys. The lab's Bonus A does exactly this.")
 
     s = D.add_image(prs, "Give it your own tools with MCP",
-        "An open standard — the same tool server works in any MCP-aware app, not only Claude Code.",
+        "The Model Context Protocol (MCP) is an open standard — the same tool server works in any MCP-aware app.",
         img(15), source="MCP: Anthropic, \"Introducing the Model Context Protocol\" (2024); modelcontextprotocol.io.")
     N(s, "Wrap a Slurm submitter, a dataset catalog, or a SQL warehouse as an MCP tool and Claude "
          "calls it like any built-in (named mcp__<server>__<tool>). MCP is an open standard — \"a "
@@ -309,7 +310,7 @@ def build(MEDIA, OUT):
 
     s = D.add_content(prs, "The project: LakeWatch",
         "A small water-quality project you have just inherited — like most real projects, a little messy.", [
-        ("Open Claude Code inside it.", "`cd hands-on/project && claude` — no notebook to run; you drive the agent directly."),
+        ("Open it on a scratch copy.", "Copy `hands-on/project` to a clean dir, start `claude` there, and drive the agent — no notebook to run."),
         ("Work the task cards.", "Each card in `hands-on/tasks/` gives you a prompt to paste, pointing at real files."),
         ("It ships its own guardrails.", "A `CLAUDE.md`, a `.claude/settings.json`, slash commands, and skills — all templates to reuse."),
     ])
@@ -320,12 +321,12 @@ def build(MEDIA, OUT):
 
     s = D.add_table(prs, "The tasks map to what you just learned",
         "Six short tasks — about 45 minutes — then two optional bonuses: a Slurm batch and your own MCP tool.",
-        ["Task", "You will practise"],
+        ["Task", "You will practice"],
         [["1 · Get your bearings", "project memory (CLAUDE.md), letting it explore"],
          ["2 · Tidy the messy data", "Plan mode → Accept-edits; raw data stays read-only"],
          ["3 · Fix the bug — safely", "a guarded autonomous fix you verify yourself"],
          ["4 · Document the project", "the writing around research; you are the reviewer"],
-         ["5 · Notes into a table", "structured extraction from documents"],
+         ["5 · Turn notes into data", "structured extraction from documents"],
          ["6 · Automate it", "a slash command, and a skill the model reaches for"]],
         colw=[2.7, 5.3], row_h=0.4, body_size=11.5, hdr_size=12)
     N(s, "Each task leaves the project in the state the next one expects. Task 3's bug is a "
@@ -367,8 +368,8 @@ def build(MEDIA, OUT):
         "Interactive Jobs — UChicago RCC. docs.rcc.uchicago.edu/slurm/sinteractive",
         "Python & Jupyter — UChicago RCC. docs.rcc.uchicago.edu/software/apps-and-envs/python",
     ]
-    D.add_references(prs, "References  (1 of 2)", REFS_A)
-    D.add_references(prs, "References  (2 of 2)", REFS_B)
+    D.add_references(prs, "References (1 of 2)", REFS_A)
+    D.add_references(prs, "References (2 of 2)", REFS_B)
 
     D.add_divider(prs, None, NPARTS, "Thank you — questions?",
         "RCC support: user guide at docs.rcc.uchicago.edu, the help desk, and office hours.",

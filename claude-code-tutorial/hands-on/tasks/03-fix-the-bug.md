@@ -2,7 +2,7 @@
 
 **Goal:** let the agent find and fix a real bug, with a test as the ground truth and the
 tests themselves protected from being "fixed."
-**You'll practise:** a guarded autonomous fix, and verifying it yourself instead of trusting the agent's word.
+**You'll practice:** a guarded autonomous fix, and verifying it yourself instead of trusting the agent's word.
 
 `src/waterquality.py` has a planted bug. Two tests are red. The rule of the house
 (`CLAUDE.md`): **never edit a test to make it pass — fix the code.**

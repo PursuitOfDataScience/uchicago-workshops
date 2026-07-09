@@ -1,7 +1,7 @@
 # Task 4 · Document the project
 
 **Goal:** finish the documentation the previous owner left half-written.
-**You'll practise:** using the agent for the writing that surrounds research — not just code.
+**You'll practice:** using the agent for the writing that surrounds research — not just code.
 
 ## Do this — paste into Claude Code
 

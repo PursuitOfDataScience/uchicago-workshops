@@ -11,7 +11,7 @@ what you will work on. See the workshop task cards in `../tasks/`.
 ## Known state (inherited)
 - `data/raw/` holds one export per site. Each site's export uses **different column
   names, units, and date formats**, and a few readings are missing or clearly wrong.
-- There is **no cleaned, merged dataset yet** (`data/clean/` is empty).
+- There is **no cleaned, merged dataset yet** — you create `data/clean/lakewatch_clean.csv` in Task 2.
 - `src/waterquality.py` has a **failing test** — something is off in the analysis.
 - `docs/data_dictionary.md` is **incomplete**.
 

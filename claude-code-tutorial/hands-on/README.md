@@ -9,8 +9,8 @@ work on Monday.
 You have inherited **LakeWatch**, a small water-quality monitoring project (`project/`). Like
 most real projects, it is a little messy: three sensor exports with mismatched columns, units,
 and date formats; a bug with a failing test; half-finished documentation; and a folder of
-free-text field notes. Over seven short tasks you will use Claude Code to clean it up, fix it,
-document it, and mine the notes — then scale one command into a batch.
+free-text field notes. Over six short tasks you will use Claude Code to clean it up, fix it,
+document it, and mine the notes — then, in a bonus, scale one command into a batch.
 
 ## Before you start
 - **Claude Code installed and logged in** — `claude --version` prints a 2.x build (see the
@@ -21,7 +21,7 @@ document it, and mine the notes — then scale one command into a batch.
 
 ## The tasks
 
-| # | Task | What you practise | Works on |
+| # | Task | What you practice | Works on |
 |---|------|-------------------|----------|
 | 0 | [Set up](tasks/00-setup.md) | copy to scratch, start `claude` | — |
 | 1 | [Get your bearings](tasks/01-orient.md) | project exploration · project memory (`CLAUDE.md`) | whole repo |

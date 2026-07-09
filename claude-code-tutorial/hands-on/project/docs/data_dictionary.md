@@ -14,6 +14,7 @@ This describes the **cleaned, merged** dataset that the cleaning step produces a
 
 ## Notes
 - The raw exports (`data/raw/`) are **not** documented here on purpose — each site's
-  export uses its own column names and units. Cleaning normalises them to the schema above.
-- Impossible readings (for example a pH outside 0–14, or a negative dissolved-oxygen
-  value) are recording errors and are removed during cleaning.
+  export uses its own column names and units. Cleaning normalizes them to the schema above.
+- **Cleaning rule.** A missing value (an empty cell or `NA`) and an impossible reading
+  (a pH outside 0–14, a negative dissolved-oxygen value) are left **blank** in the cleaned
+  data — the rest of that row is kept. Only exact duplicate rows are dropped.

@@ -2,7 +2,7 @@
 
 **Goal:** convert a folder of free-text field logs into one structured table you can join
 to the measurements.
-**You'll practise:** structured extraction — the everyday "read a pile of documents and pull
+**You'll practice:** structured extraction — the everyday "read a pile of documents and pull
 out the fields" task (lit reviews, abstracts, survey responses, lab notebooks).
 
 The `notes/` folder holds one Markdown field log per site visit. Buried in the prose is

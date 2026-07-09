@@ -121,7 +121,7 @@ def build_harness(out_path):
     ax.text(rcx, 2.78, "Anthropic", ha="center", va="center", color=GRAY, fontsize=12)
     ax.text(rcx, 2.36, "the model", ha="center", va="center", color=TEAL,
             fontsize=19, fontweight="bold")
-    ax.text(rcx, 1.92, "Claude · Opus · Sonnet · Haiku", ha="center", va="center",
+    ax.text(rcx, 1.92, "Claude — Opus · Sonnet · Haiku", ha="center", va="center",
             color=INK, fontsize=12.5)
     ax.text(rcx, 1.45, "you don't touch this", ha="center", va="center",
             color=GRAY, fontsize=12, style="italic")

@@ -2,7 +2,7 @@
 
 **Goal:** capture a repeatable check two ways — a prompt *you* run by name, and a capability
 the *model* reaches for on its own.
-**You'll practise:** slash commands and Agent Skills — and the difference between them.
+**You'll practice:** slash commands and Agent Skills — and the difference between them.
 
 ### Part A — a slash command (you fire it)
 This project ships `/data-audit`, a saved prompt in `.claude/commands/data-audit.md`.

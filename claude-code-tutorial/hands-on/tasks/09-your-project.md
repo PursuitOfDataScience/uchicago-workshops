@@ -7,7 +7,7 @@ The real payoff is doing this on your own work. A safe first session:
 2. **Write a `CLAUDE.md`.** Run `/init` to generate a starting one, then add your test command,
    where data lives, and any "never touch this" rules. Keep it under ~200 lines.
 3. **Set a guardrail.** Add a `.claude/settings.json` with a `deny` rule for anything
-   irreplaceable — raw data, credentials (`Read(**/.env)`, `Read(~/.ssh/**)`), `Bash(rm -rf*)`.
+   irreplaceable — raw data, credentials (`Read(**/.env)`, `Read(~/.ssh/**)`), `Bash(rm -rf:*)`.
 4. **Start in Plan mode.** Ask for a plan before any change; switch to Accept-edits only
    inside a clean repo.
 5. **Always give it a check.** A failing test, an exit code, a file that should or should not
