@@ -196,8 +196,46 @@ def build_slash(out_path):
     print("wrote", out_path)
 
 
+# --------------------------------------------------------------------------- image2
+def build_loop(out_path):
+    fig, ax = plt.subplots(figsize=(11.4, 5.3), dpi=200)
+    ax.set_xlim(0, 11.4); ax.set_ylim(0, 5.3); ax.axis("off")
+    cx, cy = 5.7, 2.75
+    bw, bh = 2.7, 1.12
+    nodes = {  # (x, y, kind, title, sub)
+        "top":    (5.7, 4.35, "blue",   "1 · Gather context", "read and search your files"),
+        "right":  (9.05, 2.75, "gray",  "2 · Decide",         "the model plans the next step"),
+        "bottom": (5.7, 1.15, "teal",   "3 · Act",            "edit a file, run a command"),
+        "left":   (2.35, 2.75, "orange", "4 · Check",         "did it actually work?"),
+    }
+    order = ["top", "right", "bottom", "left"]
+    # clockwise curved arrows between consecutive nodes
+    for i in range(4):
+        x0, y0 = nodes[order[i]][0], nodes[order[i]][1]
+        x1, y1 = nodes[order[(i + 1) % 4]][0], nodes[order[(i + 1) % 4]][1]
+        ax.annotate("", xy=(x1, y1), xytext=(x0, y0),
+                    arrowprops=dict(arrowstyle="-|>", color="#9AA0A6", lw=2.2,
+                                    shrinkA=52, shrinkB=52,
+                                    connectionstyle="arc3,rad=-0.28"))
+    for (x, y, kind, title, sub) in nodes.values():
+        _box(ax, x - bw / 2, y - bh / 2, bw, bh, kind, lw=2.2, radius=0.12)
+        ax.text(x, y + 0.18, title, ha="center", va="center", color=TXT[kind],
+                fontsize=14.5, fontweight="bold")
+        ax.text(x, y - 0.19, sub, ha="center", va="center", color=INK, fontsize=11.5)
+    ax.text(cx, cy + 0.14, "the loop", ha="center", va="center", color=INK,
+            fontsize=15, fontweight="bold")
+    ax.text(cx, cy - 0.2, "until the goal is met", ha="center", va="center",
+            color=GRAY, fontsize=12, style="italic")
+    ax.text(cx, 0.22, "Every action in step 3 asks your permission first.",
+            ha="center", va="center", color=TEAL, fontsize=12, style="italic")
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    fig.savefig(out_path, dpi=200); plt.close(fig)
+    print("wrote", out_path)
+
+
 if __name__ == "__main__":
     figures = sys.argv[1] if len(sys.argv) > 1 else "figures"
+    build_loop(f"{figures}/image2.png")
     build_harness(f"{figures}/image3.png")
     build_map(f"{figures}/image4.png")
     build_slash(f"{figures}/image13.png")

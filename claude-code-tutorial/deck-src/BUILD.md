@@ -5,8 +5,9 @@ reproducibly (no manual PowerPoint fiddling). Edit the text in `build_deck.py`, 
 and the `.pptx` is regenerated.
 
 ## Files
-- `build_deck.py` — the deck **content**: every slide's title, caption, bullets, table,
-  and speaker notes, in reading order. This is the file you edit to change wording.
+- `build_deck.py` — the deck **content**: every slide's title, caption, bullets, and table,
+  in reading order. This is the file you edit to change wording. (No speaker notes — the deck
+  ships without them.)
 - `deck_engine.py` — the **design system**: 16:9 layout, palette (navy / blue / teal),
   Arial, and the slide constructors (`add_title`, `add_agenda`, `add_divider`,
   `add_content`, `add_image`, `add_two_column`, `add_table`, `add_references`, and the
@@ -37,7 +38,7 @@ python render_preview.py ../claude-code-tutorial.pptx preview   # writes preview
 - Design intent: an accessible, formal intro for a general research audience. Declarative
   slide titles (never opening with What / How / When); ≤3 bullets per slide, each reading
   as a sentence; clean section dividers with a progress bar (no oversized letters);
-  captions complement (never re-narrate) the figures; concise, factual speaker notes with
-  citations; a References section closes the deck.
+  captions complement (never re-narrate) the figures; **no speaker notes** (everything is on
+  the slide); a References section closes the deck.
 - This folder is convenience tooling, not part of the workshop itself — safe to remove
   if you'd rather ship only the `.pptx`.

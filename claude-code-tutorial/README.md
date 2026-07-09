@@ -10,7 +10,7 @@ CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast,
 
 ## The workshop has two halves
 
-1. **A lecture** — `claude-code-tutorial.pptx` (~41 slides). An accessible, plain-language
+1. **A lecture** — `claude-code-tutorial.pptx` (~46 slides). An accessible, plain-language
    introduction for a general research audience: what an agent in the terminal *is*, getting
    started on Midway, making it yours, staying in control, scaling up, and honest limits.
 2. **A hands-on lab** — `hands-on/`. There is **no notebook and nothing to download** — just a
@@ -20,7 +20,7 @@ CPU + internet workshop &nbsp;·&nbsp; **Model used in the lab:** `haiku` (fast,
 
 ```
 claude-code-tutorial/
-├── claude-code-tutorial.pptx     # the lecture deck (~41 slides) — the presentation half
+├── claude-code-tutorial.pptx     # the lecture deck (~46 slides) — the presentation half
 ├── deck-src/                     # scripts + figures that generate the deck (edit + rebuild)
 │   ├── build_deck.py             #   slide content (edit wording here)
 │   ├── deck_engine.py            #   the design system (layout, palette, slide types)

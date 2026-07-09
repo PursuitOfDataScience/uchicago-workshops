@@ -328,10 +328,9 @@ def add_references(prs, title, refs, accent=TEAL, cols=2, size=10.5):
     return s
 
 
-def set_notes(slide, text):
-    """Attach concise, factual speaker notes (definitions, figures, citations)."""
-    if text:
-        slide.notes_slide.notes_text_frame.text = text
+def set_notes(slide, text=None):
+    """No-op. This deck intentionally ships WITHOUT speaker notes — everything the
+    audience needs is on the slide face. Kept as a stub so callers stay valid."""
     return slide
 
 

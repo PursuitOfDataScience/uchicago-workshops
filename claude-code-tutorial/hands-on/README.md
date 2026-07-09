@@ -6,9 +6,9 @@ nothing to download** — just this folder of Markdown task cards, a `CLAUDE.md`
 online: it writes and runs the analysis and reports the results back, while you review them.
 This is what using Claude Code for everyday data work actually feels like.
 
-Each task card (`01`–`09`) holds **only the prompt** to paste. The reference solution for every
-task — the Python code and its expected output — is in **`answers.py`**, so you can check
-Claude's numbers against a known-correct answer.
+Each task card (`01`–`09`) holds **only the prompt** to paste. The reference solution for
+Tasks 1–8 — the Python code and its expected output — is in **`answers.py`**, so you can check
+Claude's numbers against a known-correct answer. (Task 9 is your own data, so it has no key.)
 
 ## The dataset
 **Palmer Penguins** — 344 field measurements across 3 species and 3 Antarctic islands, read

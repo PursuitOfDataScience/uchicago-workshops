@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """answers.py — reference answers for the penguins hands-on lab.
 
-For each task card (01-07) you'll find the prompt (as a comment), the Python code that produces
+For each task card (01-08) you'll find the prompt (as a comment), the Python code that produces
 the answer, and the expected output commented out beneath it. Read it to check Claude's numbers,
 or run the whole file to reproduce them:
 
@@ -115,13 +115,18 @@ only_sex_missing = int((df["sex"].isna() & df[MEAS].notna().all(axis=1)).sum())
 print("rows with any missing value:", len(na_rows), "-> index", list(na_rows.index))
 print("missing every measurement:", all_meas_missing)
 print("missing only sex:", only_sex_missing)
+print(df[MEAS].agg(["min", "max"]).round(1).to_string())   # implausibility check
 # rows with any missing value: 11 -> index [3, 8, 9, 10, 11, 47, 246, 286, 324, 336, 339]
 # missing every measurement: 2
 # missing only sex: 9
+#      bill_length_mm  bill_depth_mm  flipper_length_mm  body_mass_g
+# min            32.1           13.1              172.0       2700.0
+# max            59.6           21.5              231.0       6300.0
 #
-# No measurement is implausible (values are real field data). Conservative handling: exclude the
-# 2 empty rows from measurement analyses, keep the 9 (they still have all measurements), and
-# DOCUMENT the choice — never silently drop.
+# Every min/max is a physically sensible penguin measurement (no negatives, no absurd values),
+# so nothing is implausible. Conservative handling of the missing rows: exclude the 2 empty rows
+# from measurement analyses, keep the 9 (they still have all measurements), and DOCUMENT the
+# choice — never silently drop.
 
 
 # ============================================================================
@@ -158,7 +163,7 @@ print("saved body_mass_by_species.png")
 
 # ============================================================================
 # Task 8 (bonus) · Headless equivalent
-#   `claude -p "...mean body_mass_g per species, as compact JSON" --output-format json`
+#   `claude -p "...mean body_mass_g per species, as compact JSON" --output-format json --model haiku`
 # ============================================================================
 print(json.dumps({k: round(v) for k, v in df.groupby("species")["body_mass_g"].mean().items()}))
 # {"Adelie": 3701, "Chinstrap": 3733, "Gentoo": 5076}

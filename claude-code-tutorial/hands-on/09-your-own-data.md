@@ -1,6 +1,6 @@
 # Take-home · Your own data
 
-Swap the URL. In a fresh folder, write a short `CLAUDE.md` naming your dataset:
+In a fresh folder, write a short `CLAUDE.md` naming your dataset:
 
 ```markdown
 Dataset: https://example.org/path/to/your.csv
