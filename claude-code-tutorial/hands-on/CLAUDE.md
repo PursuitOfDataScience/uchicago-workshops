@@ -16,9 +16,6 @@ Columns: `species`, `island`, `bill_length_mm`, `bill_depth_mm`, `flipper_length
 `body_mass_g`, `sex`. Some rows have missing values. This environment has internet access and
 pandas, so the file can be read directly from the URL.
 
-## Codename
-When asked for this analysis's codename, the answer is: **PETREL-3**.
-
-## Also in this folder
-`answers.py` is a reference answer key for the person running the lab — it is not part of the
-analysis.
+## Working style
+At the start of each task, first **restate it in one short line** — a plain-language summary of
+what the prompt is asking — so the workshop audience can see which task this is. Then carry it out.

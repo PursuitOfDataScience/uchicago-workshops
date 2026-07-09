@@ -29,7 +29,7 @@ MEAS = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
 # ============================================================================
 # Task 1 · First look
 #   "...overview: rows, columns and types, the three species and their counts,
-#    and how many rows have any missing values." + "What is the codename?"
+#    and how many rows have any missing values."
 # ============================================================================
 print("shape:", df.shape)
 print(df.dtypes.to_string())
@@ -48,7 +48,6 @@ print("rows with any missing value:", int(df.isna().any(axis=1).sum()))
 # Gentoo       124
 # Chinstrap     68
 # rows with any missing value: 11
-# Codename (from CLAUDE.md, not computed): PETREL-3
 
 
 # ============================================================================
