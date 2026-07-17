@@ -7,9 +7,11 @@ headlessly from a single command.
 
 ## The workshop has two halves
 
-1. **A lecture** — `claude-code-tutorial.pptx` (~46 slides). An accessible, plain-language
-   introduction for a general research audience: what an agent in the terminal *is*, getting
-   started on Midway, making it yours, staying in control, scaling up, and honest limits.
+1. **A lecture** — `claude-code-tutorial.pptx` (~39 slides). A formal, accessible introduction
+   for a general research audience: what an AI agent is, Claude Code as one such agent, its
+   applications in research, configuring it (model, effort, context window), commands and
+   permissions, customization (CLAUDE.md, skills, MCP), and using it on the cluster (Slurm and
+   Midway3). Setting it up is the hands-on lab's job, not the lecture's.
 2. **A hands-on lab** — `hands-on/`. There is **no notebook and nothing to download** — just a
    flat folder of Markdown task cards and a `CLAUDE.md`. You open Claude Code there and drive it in
    plain English, in two parts: **Part 1** navigates Midway3 itself (quota, jobs, allocations,
@@ -18,7 +20,7 @@ headlessly from a single command.
 
 ```
 claude-code-tutorial/
-├── claude-code-tutorial.pptx     # the lecture deck (~46 slides) — the presentation half
+├── claude-code-tutorial.pptx     # the lecture deck (~39 slides) — the presentation half
 ├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
 │   ├── CLAUDE.md                 #   project memory: Midway3 facts + the dataset URL
 │   ├── README.md                 #   how to start + the task index
