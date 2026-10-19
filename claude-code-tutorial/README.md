@@ -3,7 +3,7 @@
 <p align="center"><b>Learn Claude Code by doing: seven short prompts, on any computer.</b><br>
 The hands-on exercise of the RCC workshop.</p>
 
-## 🚀 Set up
+## Set up
 
 1. Install Claude Code (on Windows PowerShell: `irm https://claude.ai/install.ps1 | iex`).
    ```bash
@@ -24,7 +24,7 @@ The hands-on exercise of the RCC workshop.</p>
    /effort medium
    ```
 
-## 🧪 The steps
+## The steps
 
 Send each line in Claude Code, in order, in the same session.
 
@@ -61,7 +61,7 @@ start @7-my-data.md
 `hands-on/answers.py` is the answer key: Claude is blocked from reading it, so you check the
 numbers yourself.
 
-## 🐍 The same analysis from Python
+## The same analysis from Python
 
 ```bash
 pip install claude-agent-sdk
@@ -69,7 +69,7 @@ export ANTHROPIC_API_KEY=sk-ant-...   # a Console API key; keep it out of files
 cd sdk && python 01_one_shot.py       # then 02, 03, 04: each caps its own spend
 ```
 
-## ⚠️ What will bite you
+## Troubleshooting
 
 | Symptom | Fix |
 | :- | :- |
