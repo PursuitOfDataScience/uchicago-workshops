@@ -68,12 +68,3 @@ pip install claude-agent-sdk
 export ANTHROPIC_API_KEY=sk-ant-...   # a Console API key; keep it out of files
 cd sdk && python 01_one_shot.py       # then 02, 03, 04: each caps its own spend
 ```
-
-## Troubleshooting
-
-| Symptom | Fix |
-| :- | :- |
-| Claude acts without asking | Sessions start in auto mode: press Shift+Tab until the mode line reads `manual mode on` |
-| `/model sonnet` is refused | Your organization has turned that model off: pick another one in `/model` |
-| "Permission denied" on `answers.py` | Intended: the key is blocked so Claude's checks are its own |
-| On a shared cluster | Run `chmod 700 ~/.claude` after logging in: home directories can be group-readable |
