@@ -1,11 +1,13 @@
-# Experiment scratch — kept local, never pushed to GitHub.
+# Experiment scratch: kept local, never pushed to GitHub.
 # (All experimental work lives on the `exp` branch per experiments.md, but the
 #  experiment scratch itself is intentionally excluded from the remote.)
 /experiments.md
 /experiments/
 
-# Deck build tooling — kept local; workshop attendees need only the .pptx, not the source.
+# The deck and its build tooling: kept local. The slides are shared through Google Drive,
+# not this repository; attendees need only hands-on/, sdk/, and the README.
 /claude-code-tutorial/deck-src/
+/claude-code-tutorial/*.pptx
 
 # Python / build artifacts
 __pycache__/

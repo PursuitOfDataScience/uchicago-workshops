@@ -1,90 +1,79 @@
-# Claude Code on Midway
+<h1 align="center">Claude Code in Practice</h1>
 
-A hands-on workshop that introduces **Claude Code** — Anthropic's AI *coding agent* — as
-everyday **research infrastructure** on a shared HPC cluster. You will install it on Midway,
-use it interactively to analyze a real dataset, keep it safe on shared hardware, and drive it
-headlessly from a single command.
+<p align="center"><b>Learn Claude Code by doing: seven short prompts, on any computer.</b><br>
+The hands-on exercise of the RCC workshop.</p>
 
-## The workshop has two halves
+## 🚀 Set up
 
-1. **A lecture** — `claude-code-tutorial.pptx` (~39 slides). A formal, accessible introduction
-   for a general research audience: what an AI agent is, Claude Code as one such agent, its
-   applications in research, configuring it (model, effort, context window), commands and
-   permissions, customization (CLAUDE.md, skills, MCP), and using it on the cluster (Slurm and
-   Midway3). Setting it up is the hands-on lab's job, not the lecture's.
-2. **A hands-on lab** — `hands-on/`. There is **no notebook and nothing to download** — just a
-   flat folder of Markdown task cards and a `CLAUDE.md`. You open Claude Code there and drive it in
-   plain English, in two parts: **Part 1** navigates Midway3 itself (quota, jobs, allocations,
-   partitions, software), and **Part 2** analyzes a dataset **hosted online**. It writes and runs
-   the commands and reports back while you review — what using Claude Code as research infra feels like.
+1. Install Claude Code (on Windows PowerShell: `irm https://claude.ai/install.ps1 | iex`).
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
+2. Get the files and start Claude Code. Log in when asked, then trust the folder.
+   ```bash
+   git clone https://github.com/PursuitOfDataScience/uchicago-workshops
+   cd uchicago-workshops/claude-code-tutorial/hands-on
+   claude
+   ```
+3. In Claude Code, send these two lines one at a time (Sonnet 5.5 at medium effort), then press
+   Shift+Tab until the mode line reads `manual mode on`.
+   ```text
+   /model sonnet
+   ```
+   ```text
+   /effort medium
+   ```
 
+## 🧪 The steps
+
+Send each line in Claude Code, in order, in the same session.
+
+**1 · Permission prompts.** Claude sets up Python and downloads the data; answer each prompt.
+```text
+set up @1-setup.md
 ```
-claude-code-tutorial/
-├── claude-code-tutorial.pptx     # the lecture deck (~39 slides) — the presentation half
-├── hands-on/                     # the interactive lab — the second half (flat: no subfolders)
-│   ├── CLAUDE.md                 #   project memory: Midway3 facts + the dataset URL
-│   ├── README.md                 #   how to start + the task index
-│   ├── 01-…08-….md               #   Part 1: navigate Midway3 (prompts to paste)
-│   ├── 09-…17-….md               #   Part 2: analyze a dataset (prompts to paste)
-│   └── answers.py                #   reference answers for Part 2: code + expected output
-└── README.md                     # this file
+**2 · Steering while Claude works.** Type a message as it runs, or ask `/btw` a side question.
+```text
+explore @2-explore.md
+```
+**3 · Plan mode.** Press Shift+Tab until it reads `plan mode on`, send this, then approve the
+plan with "Yes, manually approve edits".
+```text
+analyze @3-analysis.md
+```
+**4 · Subagents.** Two helpers check the result, each in its own context.
+```text
+verify @4-verify.md
+```
+**5 · `/goal`.** Claude keeps working until a separate checker confirms the finish line.
+```text
+/goal @5-finish-line.md
+```
+**6 · Skills.** Save the check as a skill, then run it with `/check-numbers`.
+```text
+create @6-skill.md
+```
+**7 · Take-home.** A starter kit for your own data.
+```text
+start @7-my-data.md
 ```
 
-## Getting started
+`hands-on/answers.py` is the answer key: Claude is blocked from reading it, so you check the
+numbers yourself.
 
-### 1. Install Claude Code (no sudo needed)
-Native installer (recommended — installs the `claude` binary to `~/.local/bin`, no root, no Node):
+## 🐍 The same analysis from Python
+
 ```bash
-curl -fsSL https://claude.ai/install.sh | bash
-```
-Or via npm with a user prefix (needs a recent Node.js; **do not** use `sudo`):
-```bash
-npm config set prefix ~/.npm-global && npm install -g @anthropic-ai/claude-code
-export PATH="$HOME/.npm-global/bin:$PATH"
-```
-Check: `claude --version` should print a **2.x** build (`claude doctor` diagnoses a bad install).
-
-### 2. Authenticate
-Just start Claude Code and log in from inside it — no tokens to mint by hand:
-```bash
-claude          # start it, then type:
-/login          # follow the prompt: open the URL it prints, authorize, paste the code back
-```
-That's it. Log in once with your Claude.ai account (Pro/Max) and the credentials are saved under
-`$CLAUDE_CONFIG_DIR` (default `~/.claude`), so later `claude` and `claude -p` runs on that node
-just work.
-
-Run `chmod 700 ~/.claude` afterwards — cluster home directories are sometimes group-readable.
-
-> **Scripts / batch jobs only:** if you'd rather not log in interactively, export a Console API
-> key instead — `export ANTHROPIC_API_KEY=sk-ant-...` (source it from a `chmod 600` file; never
-> hard-code it). For interactive use, `/login` is the easy path.
-
-### 3. On Midway3
-Request an interactive job (no GPU needed), then activate the shared environment used across this
-workshop series:
-```bash
-source /software/python-miniforge-25.3.0-el8-x86_64/bin/activate AI
-export CLAUDE_CONFIG_DIR=$HOME/.claude
-export DISABLE_AUTOUPDATER=1              # pin CLI behaviour during the session
+pip install claude-agent-sdk
+export ANTHROPIC_API_KEY=sk-ant-...   # a Console API key; keep it out of files
+cd sdk && python 01_one_shot.py       # then 02, 03, 04: each caps its own spend
 ```
 
-## Running the hands-on lab
-Work on a node with internet, then:
-```bash
-cd hands-on          # (or copy the folder somewhere writable and cd there)
-claude
-```
-Then follow the task cards, pasting each prompt and checking Claude's work. **Part 1 (Tasks 1–8)**
-has Claude navigate Midway3 itself — your disk quota, your jobs, your allocation balance, cluster
-and partition load, interactive sessions, batch scripts, and software modules — by running the
-RCC/Slurm commands for you and explaining the output (read-only; nothing is submitted or deleted).
-**Part 2 (Tasks 9–17, ~40 min)** points it at a **hosted dataset** (Palmer Penguins — from a URL,
-nothing to download) for a short analysis: a first look, per-species summaries, a comparison, a
-correlation, a data-quality audit, a saved figure, and a written-up Results paragraph — then a
-headless bonus and a bring-your-own-data take-home. Full instructions and both task indexes are in
-[`hands-on/README.md`](hands-on/README.md).
+## ⚠️ What will bite you
 
-## Documentation
-Claude Code: [`code.claude.com/docs`](https://code.claude.com/docs) &nbsp;·&nbsp; RCC user guide:
-[`docs.rcc.uchicago.edu`](https://docs.rcc.uchicago.edu).
+| Symptom | Fix |
+| :- | :- |
+| Claude acts without asking | Sessions start in auto mode: press Shift+Tab until the mode line reads `manual mode on` |
+| `/model sonnet` is refused | Your organization has turned that model off: pick another one in `/model` |
+| "Permission denied" on `answers.py` | Intended: the key is blocked so Claude's checks are its own |
+| On a shared cluster | Run `chmod 700 ~/.claude` after logging in: home directories can be group-readable |

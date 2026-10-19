@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./hands-on/answers.py)"
+    ]
+  }
+}

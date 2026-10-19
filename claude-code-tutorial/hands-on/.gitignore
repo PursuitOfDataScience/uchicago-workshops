@@ -1,0 +1,11 @@
+# Files the exercise creates as you work through it.
+.venv/
+data/
+results/
+analyze.py
+*.log
+__pycache__/
+.claude/settings.local.json
+.claude/skills/*
+!.claude/skills/.gitkeep
+my-project/
