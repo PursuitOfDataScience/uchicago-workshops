@@ -4,10 +4,9 @@
 /experiments.md
 /experiments/
 
-# The deck and its build tooling: kept local. The slides are shared through Google Drive,
-# not this repository; attendees need only hands-on/, sdk/, and the README.
+# The deck's build tooling: kept local. Only the finished deck,
+# claude-code-tutorial/claude-code-tutorial.pptx, is tracked.
 /claude-code-tutorial/deck-src/
-/claude-code-tutorial/*.pptx
 
 # Python / build artifacts
 __pycache__/
